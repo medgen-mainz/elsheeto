@@ -1,0 +1,160 @@
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+[project]
+authors = [{name = "Manuel Holtgrewe"}]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "pydantic>=2.12,<3.0",
+    "ruff>=0.14.2",
+]
+description = "I/O and models in type-annotated Python for NGS sample sheets: Illumina and Aviti"
+keywords = []
+name = "elsheeto"
+version = "0.0.0"
+readme = "README.md"
+requires-python = ">=3.13"
+
+[project.urls]
+Documentation = "https://github.com/medgen-mainz/elsheeto"
+Issues = "https://github.com/medgen-mainz/elsheeto/issues"
+Source = "https://github.com/medgen-mainz/elsheeto"
+
+[tool.hatch.version]
+path = "elsheeto/version.py"
+
+[dependency-groups]
+dev = [
+    "black==25.9.0",
+    "coverage>=7.10.7",
+    "docutils>=0.22.0",
+    "flake8>=3.6.0",
+    "hatch~=1.14.2",
+    "pyright",
+    "pytest-cache>=1.0",
+    "pytest-cov",
+    "pytest-cov>=2.4.0",
+    "pytest-sugar>=0.8.0",
+    "pytest>=3.0.6",
+]
+
+[tool.hatch.envs.quality]
+installer = "uv"
+feature = [
+  "dev",
+]
+
+[tool.hatch.envs.quality.scripts]
+check = [
+  "black --check --diff --preview src tests",
+  "ruff check src tests",
+]
+format = [
+  "black src tests",
+  "ruff check --fix --unsafe-fixes src tests",
+  "check",
+]
+typecheck = [
+  """
+  pyright --pythonpath="$(uv run --active hatch run quality:python -c 'import sys; print(sys.executable)')" \
+    {args:src/ tests/}
+  """
+]
+
+[tool.pyright]
+include = ["src/elsheeto"]
+exclude = [
+    "**/node_modules",
+    "**/__pycache__",
+]
+defineConstant = { DEBUG = true }
+stubPath = "src/stubs"
+
+reportMissingImports = "error"
+reportMissingTypeStubs = false
+
+pythonVersion = "3.13"
+pythonPlatform = "Linux"
+
+[tool.ruff]
+lint.ignore = [
+  "E501", # line too long, handled by black
+  "B008", # do not perform function calls in argument defaults
+  "C901", # too complex
+  # the following are known issues in generated code
+  "E721", # is vs. ==
+  "C409", # Unnecessary list literal
+  "B028", # No stacklevel in warnings.warn
+  "B904", # raise from e not used
+  "C405", # Unnecessary list literal (rewrite as set literal)
+  "C402", # inconvenient dictionary creation
+]
+lint.select = [
+  "E", # pycodestyle errors
+  "W", # pycodestyle warnings
+  "F", # pyflakes
+  "I", # isort
+  "C", # flake8-comprehensions
+  "B", # flake8-bugbear
+]
+
+[tool.black]
+line-length = 120
+
+[tool.pytest.ini_options]
+addopts = "--doctest-modules"
+
+[tool.ruff.lint.isort]
+known-first-party = ["src/elsheeto"]
+
+[tool.hatch.envs.tests]
+installer = "uv"
+feature = [
+  "dev",
+]
+
+[tool.hatch.envs.tests.scripts]
+run = "pytest --cov=src/elsheeto --cov-report=term-missing --durations 5 -s tests/ src/elsheeto {args:tests}"
+
+[tool.hatch.envs.docs]
+installer = "uv"
+feature = [
+  "dev",
+]
+
+[tool.hatch.envs.docs.scripts]
+build = "sphinx-build -b html docs docs/_build/html"
+clean = "rm -rf docs/_build"
+
+[tool.hatch.envs.build]
+installer = "uv"
+feature = [
+  "dev",
+]
+
+[tool.hatch.envs.build.scripts]
+run = "hatch build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/elsheeto"]
+
+[tool.hatch.build.targets.sdist]
+packages = ["src/elsheeto"]
+exclude = [
+  "/.editorconfig",
+  "/Makefile",
+  "/.gitignore",
+  "/.github",
+  "/.vscode",
+  "/.gitignore",
+  "/tests",
+]

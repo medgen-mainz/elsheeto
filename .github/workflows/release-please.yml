@@ -1,0 +1,38 @@
+on:
+  push:
+    branches:
+      - main
+
+name: release-please
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          token: ${{ secrets.BOT_TOKEN }}
+          include-component-in-tag: false
+
+      - uses: actions/checkout@v5
+        if: ${{ steps.release.outputs.release_created }}
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Build package
+        if: ${{ steps.release.outputs.release_created }}
+        run: |
+          uv run hatch run build:run
+
+      - name: Publish to PyPI
+        if: ${{ steps.release.outputs.release_created }}
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_TOKEN }}

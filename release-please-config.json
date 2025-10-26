@@ -1,0 +1,15 @@
+{
+  "release-type": "python",
+  "bump-minor-pre-major": false,
+  "bump-patch-for-minor-pre-major": false,
+  "draft": false,
+  "prerelease": false,
+  "packages": {
+    ".": {
+      "package-name": "elsheeto",
+      "release-type": "python",
+      "version-file": "src/elsheeto/version.py",
+      "component": ""
+    }
+  }
+}
