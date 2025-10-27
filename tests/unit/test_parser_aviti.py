@@ -439,7 +439,7 @@ class TestParseFunctionInterface:
 
     def test_parse_function(self):
         """Test the module-level parse function."""
-        from elsheeto.parser.aviti import parse
+        from elsheeto.parser.aviti import from_stage2
 
         config = ParserConfiguration()
 
@@ -450,7 +450,7 @@ class TestParseFunctionInterface:
 
         parsed_sheet = _create_parsed_sheet(data_section=data_section)
 
-        aviti_sheet = parse(parsed_sheet=parsed_sheet, config=config)
+        aviti_sheet = from_stage2(parsed_sheet=parsed_sheet, config=config)
 
         assert isinstance(aviti_sheet, AvitiSheet)
         assert len(aviti_sheet.samples) == 1
@@ -488,16 +488,16 @@ class TestSmokeTestWithRealData:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
 
-        raw_sheet = stage1.parse(data=content, config=config)
+        raw_sheet = stage1.from_csv(data=content, config=config)
         assert raw_sheet is not None
 
         # Stage 2: Convert to structured format
-        structured_sheet = stage2.parse(raw_sheet=raw_sheet, config=config)
+        structured_sheet = stage2.from_stage1(raw_sheet=raw_sheet, config=config)
         assert structured_sheet is not None
         assert structured_sheet.data_section is not None
 
         # Stage 3: Convert to Aviti specific format
-        aviti_sheet = stage3.parse(parsed_sheet=structured_sheet, config=config)
+        aviti_sheet = stage3.from_stage2(parsed_sheet=structured_sheet, config=config)
         assert aviti_sheet is not None
         assert isinstance(aviti_sheet, AvitiSheet)
 

@@ -314,7 +314,7 @@ class Parser:
         return samples
 
 
-def parse(*, parsed_sheet: ParsedSheet, config: ParserConfiguration) -> IlluminaSampleSheet:
+def from_stage2(*, parsed_sheet: ParsedSheet, config: ParserConfiguration) -> IlluminaSampleSheet:
     """Convert structured sheet data into Illumina v1 sample sheet.
 
     Args:

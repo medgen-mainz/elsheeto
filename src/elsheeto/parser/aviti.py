@@ -231,7 +231,7 @@ class Parser:
         return samples
 
 
-def parse(*, parsed_sheet: ParsedSheet, config: ParserConfiguration) -> AvitiSheet:
+def from_stage2(*, parsed_sheet: ParsedSheet, config: ParserConfiguration) -> AvitiSheet:
     """Convert structured sheet data into Aviti sample sheet.
 
     Args:
