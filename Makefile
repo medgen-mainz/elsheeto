@@ -7,7 +7,9 @@ help:
 	@echo "  help                   Show this help message"
 	@echo "  fix                    Format source code"
 	@echo "  check                  Run checks"
-	@echo "  test                   Format source code"
+	@echo "  test                   Run tests"
+	@echo "  docs                   Build documentation"
+	@echo "  docs-clean             Clean documentation build"
 	@echo "  sdist                  Build source distribution"
 
 .PHONY: fix
