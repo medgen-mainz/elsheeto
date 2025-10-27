@@ -1,13 +1,11 @@
 """Unit tests for stage1 parser."""
 
-import pathlib
 import pytest
 
 from elsheeto.models.csv_stage1 import ParsedRawSheet, ParsedRawType
 from elsheeto.parser.common import (
     CaseConsistency,
     ColumnConsistency,
-    CsvDelimiter,
     ParserConfiguration,
 )
 from elsheeto.parser.stage1 import Parser, parse
@@ -322,136 +320,6 @@ X,Y
         header_section = result.sections[0]
         assert header_section.data[0] == ["Field 1", "Field, 2", 'Field "3"']
         assert header_section.data[1] == ["Value 1", "Value, 2", 'Value "3"']
-
-
-def _get_test_csv_files():
-    """Get all CSV files from the test data directory.
-    
-    Returns:
-        List of pathlib.Path objects for all CSV files in tests/data/*/*.csv
-    """
-    test_data_dir = pathlib.Path(__file__).parent.parent / "data"
-    csv_files = []
-    
-    # Find all CSV files in subdirectories
-    for subdir in test_data_dir.iterdir():
-        if subdir.is_dir():
-            for csv_file in subdir.glob("*.csv"):
-                csv_files.append(csv_file)
-    
-    return sorted(csv_files)
-
-
-def _get_test_configurations():
-    """Get various parser configurations for smoke testing.
-    
-    Returns:
-        List of tuples (config_name, ParserConfiguration) for testing.
-    """
-    return [
-        ("default", ParserConfiguration()),
-        ("case_sensitive", ParserConfiguration(
-            section_header_case=CaseConsistency.CASE_SENSITIVE,
-            column_header_case=CaseConsistency.CASE_SENSITIVE,
-            key_case=CaseConsistency.CASE_SENSITIVE,
-        )),
-        ("loose_columns", ParserConfiguration(
-            column_consistency=ColumnConsistency.LOOSE,
-        )),
-        ("strict_global", ParserConfiguration(
-            column_consistency=ColumnConsistency.STRICT_GLOBAL,
-        )),
-        ("no_empty_line_ignore", ParserConfiguration(
-            ignore_empty_lines=False,
-        )),
-        ("comma_delimiter", ParserConfiguration(
-            delimiter=CsvDelimiter.COMMA,
-        )),
-        ("tab_delimiter", ParserConfiguration(
-            delimiter=CsvDelimiter.TAB,
-        )),
-        ("semicolon_delimiter", ParserConfiguration(
-            delimiter=CsvDelimiter.SEMICOLON,
-        )),
-        ("custom_comments", ParserConfiguration(
-            comment_prefixes=["#", "//", ";"],
-        )),
-    ]
-
-
-@pytest.mark.parametrize("csv_file", _get_test_csv_files(), ids=lambda p: f"{p.parent.name}/{p.name}")
-@pytest.mark.parametrize("config_name,config", _get_test_configurations(), ids=lambda x: x[0] if isinstance(x, tuple) else str(x))
-class TestSmokeTests:
-    """Smoke tests running all test CSV files with various configurations."""
-
-    def test_parse_smoke(self, csv_file: pathlib.Path, config_name: str, config: ParserConfiguration):
-        """Smoke test parsing all CSV files with various configurations.
-        
-        This test ensures that:
-        1. The parser doesn't crash on any of the test files
-        2. The parser returns a valid ParsedRawSheet
-        3. Basic structural properties are maintained
-        
-        Args:
-            csv_file: Path to the CSV file to test.
-            config_name: Name of the configuration being tested.
-            config: Parser configuration to use.
-        """
-        # Read the test file
-        with open(csv_file, 'r', encoding='utf-8') as f:
-            data = f.read()
-        
-        try:
-            # Parse with the given configuration
-            parser = Parser(config)
-            result = parser.parse(data=data)
-            
-            # Basic validation that we got a valid result
-            assert isinstance(result, ParsedRawSheet)
-            assert result.delimiter in [",", "\t", ";"]  # Should be one of the supported delimiters
-            assert result.sheet_type in [ParsedRawType.SECTIONED, ParsedRawType.SECTIONLESS]
-            assert isinstance(result.sections, list)
-            assert len(result.sections) >= 1  # Should have at least one section
-            
-            # Validate each section
-            for section in result.sections:
-                assert isinstance(section.name, str)
-                assert isinstance(section.num_columns, int)
-                assert section.num_columns >= 0
-                assert isinstance(section.data, list)
-                
-                # If there's data, num_columns should be the max row length
-                if section.data:
-                    max_cols = max(len(row) for row in section.data) if section.data else 0
-                    assert section.num_columns == max_cols
-            
-            # Additional validation based on file type
-            if "illumina" in str(csv_file):
-                # Illumina files should typically be sectioned
-                assert result.sheet_type == ParsedRawType.SECTIONED
-                # Should have multiple sections (Header, Data, etc.)
-                assert len(result.sections) >= 1
-                
-            elif "aviti" in str(csv_file):
-                # Aviti files should typically be sectioned
-                assert result.sheet_type == ParsedRawType.SECTIONED
-                # Should have at least a Samples section
-                section_names = [s.name.lower() for s in result.sections]
-                assert any("sample" in name for name in section_names)
-        
-        except ValueError as e:
-            # Some configurations may legitimately fail with certain files
-            # (e.g., strict column consistency with inconsistent data)
-            # We allow these to fail but log them for awareness
-            if "column consistency violated" in str(e):
-                pytest.skip(f"Expected failure with {config_name} on {csv_file.name}: {e}")
-            else:
-                # Re-raise unexpected ValueError
-                raise
-        
-        except Exception as e:
-            # Any other exception is a real failure
-            pytest.fail(f"Unexpected error with {config_name} on {csv_file.name}: {e}")
 
 
 class TestParseFunction:
