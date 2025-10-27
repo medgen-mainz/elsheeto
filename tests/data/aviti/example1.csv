@@ -1,0 +1,5 @@
+[Samples],,,
+SampleName,Index1,Index2,Lane,Project
+Sample_1,CCC,AAA,1,Library_Pool_1
+Sample_2,TTT,GGG,1,Library_Pool_1
+Sample_3,AAA,GGG,2,Library_Pool_2
