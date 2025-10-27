@@ -2,4 +2,4 @@
 
 # El Sheeto
 
-I/O and models in type-annotated Python for NGS sample sheets: Illumina and Aviti
+I/O and models in type-annotated Python for NGS sample sheets: Illumina (v1) and Aviti
