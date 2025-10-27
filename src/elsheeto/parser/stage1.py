@@ -12,7 +12,8 @@ import csv
 import io
 import logging
 
-from elsheeto.models.csv_stage1 import ParsedRawSection, ParsedRawSheet, ParsedRawType
+from elsheeto.models.common import ParsedSheetType
+from elsheeto.models.csv_stage1 import ParsedRawSection, ParsedRawSheet
 from elsheeto.parser.common import (
     ColumnConsistency,
     ParserConfiguration,
@@ -54,9 +55,9 @@ class Parser:
 
         # Determine sheet type
         sheet_type = (
-            ParsedRawType.SECTIONED
+            ParsedSheetType.SECTIONED
             if len(sections) > 1 or (len(sections) == 1 and sections[0].name != "")
-            else ParsedRawType.SECTIONLESS
+            else ParsedSheetType.SECTIONLESS
         )
 
         # Apply column consistency checks
