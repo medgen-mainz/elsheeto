@@ -1,0 +1,5 @@
+[Samples],,,
+SampleName,Index1,Index2,Lane,Custom_Metadata
+Sample_1,CCC,,1,Sample_1_metadata
+Sample_2,TTT,,1,Sample_2_metadata
+Sample_3,AAA,,1,Sample_3_metadata

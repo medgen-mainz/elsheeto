@@ -23,6 +23,10 @@ check:
 test:
 	uv run hatch run tests:run
 
+.PHONY: test-snapshot
+test-snapshot:
+	uv run hatch run tests:run-snapshot
+
 .PHONY: docs
 docs:
 	uv run hatch run docs:build

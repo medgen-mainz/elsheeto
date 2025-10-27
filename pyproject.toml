@@ -45,6 +45,7 @@ dev = [
     "pytest-cov>=2.4.0",
     "pytest-sugar>=0.8.0",
     "pytest>=3.0.6",
+    "syrupy>=5.0.0",
 ]
 
 [tool.hatch.envs.quality]
@@ -124,6 +125,7 @@ feature = [
 
 [tool.hatch.envs.tests.scripts]
 run = "pytest --cov=src/elsheeto --cov-report=term-missing --durations 5 -s tests/ src/elsheeto {args:tests}"
+run-snapshot = "pytest --cov=src/elsheeto --cov-report=term-missing --durations 5 -s --snapshot-update tests/ src/elsheeto {args:tests}"
 
 [tool.hatch.envs.docs]
 installer = "uv"

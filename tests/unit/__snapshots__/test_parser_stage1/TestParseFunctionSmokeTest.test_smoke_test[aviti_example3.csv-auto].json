@@ -1,0 +1,41 @@
+{
+  "delimiter": ",",
+  "sections": [
+    {
+      "data": [
+        [
+          "R1Adapter",
+          " CGTGCTGGATTGGCTCACCAGACACCTTCCGACAT"
+        ],
+        [
+          "R2Adapter",
+          " AGTTGACAAGCGGTAGCCTGCACACCTTCCGACAT"
+        ]
+      ],
+      "name": "settings",
+      "num_columns": 2
+    },
+    {
+      "data": [
+        [
+          "SampleName",
+          "Index1",
+          "Index2"
+        ],
+        [
+          "Sample1",
+          "AGGCAGAA",
+          "TGCTACGA"
+        ],
+        [
+          "Sample2",
+          "CGTTCTCTTG",
+          "CACCAAGTGG"
+        ]
+      ],
+      "name": "samples",
+      "num_columns": 3
+    }
+  ],
+  "sheet_type": "sectioned"
+}

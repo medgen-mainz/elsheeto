@@ -1,0 +1,205 @@
+{
+  "delimiter": ",",
+  "sections": [
+    {
+      "data": [
+        [
+          "IEMFileVersion",
+          "4",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Investigator Name",
+          "JS",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Experiment Name",
+          "MyExperimentName",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Date",
+          "10.10.2025",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Workflow",
+          "GenerateFASTQ",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Application",
+          "FASTQ Only",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Assay",
+          "TruSeq HT",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Description",
+          "MyDescription",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Chemistry",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Run",
+          "111111_M00001_0111_000000000-M111P",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      ],
+      "name": "header",
+      "num_columns": 9
+    },
+    {
+      "data": [
+        [
+          "150",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "8",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "130",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      ],
+      "name": "reads",
+      "num_columns": 9
+    },
+    {
+      "data": [],
+      "name": "settings",
+      "num_columns": 0
+    },
+    {
+      "data": [
+        [
+          "Sample_ID",
+          "Sample_Name",
+          "Sample_Plate",
+          "Sample_Well",
+          "Inline_ID",
+          "index",
+          "I7_Index_ID",
+          "index2",
+          "Sample_Project"
+        ],
+        [
+          "1",
+          "L11-01111_I01",
+          "",
+          "",
+          "5GS001-A1",
+          "TTCGCTCA",
+          "DGS08",
+          "TAATGCGC",
+          ""
+        ],
+        [
+          "2",
+          "L11-01112_I01",
+          "",
+          "",
+          "5GS002-B1",
+          "TATGGCAC",
+          "DGS08",
+          "TAATGCGC",
+          ""
+        ]
+      ],
+      "name": "data",
+      "num_columns": 9
+    }
+  ],
+  "sheet_type": "sectioned"
+}
