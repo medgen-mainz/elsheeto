@@ -11,23 +11,33 @@ from pydantic import BaseModel, ConfigDict, Field
 class IlluminaHeader(BaseModel):
     """Representation of the Illumina v1 `Header` section."""
 
+    #: Optional `IEMFileVersion` field.
+    iem_file_version: Annotated[str | None, Field(default=None)]
     #: Optional `Investigator Name` field.
     investigator_name: Annotated[str | None, Field(default=None)]
-    #: Optional `Project Name` field.
-    date: Annotated[str | None, Field(default=None)]
     #: Optional `Experiment Name` field.
-    project_name: Annotated[str | None, Field(default=None)]
+    experiment_name: Annotated[str | None, Field(default=None)]
     #: Optional `Date` field.
-    investigator_name: Annotated[str | None, Field(default=None)]
+    date: Annotated[str | None, Field(default=None)]
     #: Required `Workflow` field.
     workflow: Annotated[str, Field(default="GenerateFASTQ")]
+    #: Optional `Application` field.
+    application: Annotated[str | None, Field(default=None)]
+    #: Optional `Instrument Type` field.
+    instrument_type: Annotated[str | None, Field(default=None)]
     #: Optional `Assay` field.
     assay: Annotated[str | None, Field(default=None)]
+    #: Optional `Index Adapters` field.
+    index_adapters: Annotated[str | None, Field(default=None)]
+    #: Optional `Description` field.
+    description: Annotated[str | None, Field(default=None)]
     #: `Chemistry` field, must be set to `amplicon` (case insensitive)
     #: for dual indexing.
     chemistry: Annotated[str | None, Field(default=None)]
+    #: Optional `Run` field.
+    run: Annotated[str | None, Field(default=None)]
 
-    #: Optional extra metadata.
+    #: Optional extra metadata for fields not explicitly defined.
     extra_metadata: Annotated[dict[str, str], Field(default_factory=dict)]
 
     #: Model configuration.
@@ -65,31 +75,33 @@ class IlluminaSample(BaseModel):
     """One entry in the Illumina v1 `Data` section."""
 
     #: Optional `Lane` field.
-    lane: int | None = None
+    lane: Annotated[int | None, Field(default=None)]
     #: `Sample_ID` field.
     sample_id: str
     #: Optional `Sample_Name` field.
-    sample_plate: str | None = None
+    sample_name: Annotated[str | None, Field(default=None)]
+    #: Optional `Sample_Plate` field.
+    sample_plate: Annotated[str | None, Field(default=None)]
     #: Optional `Sample_Well` field.
-    sample_well: str | None = None
+    sample_well: Annotated[str | None, Field(default=None)]
     #: Optional `Index_Plate_Well` field.
-    index_plate_well: str | None = None
+    index_plate_well: Annotated[str | None, Field(default=None)]
+    #: Optional `Inline_ID` field.
+    inline_id: Annotated[str | None, Field(default=None)]
     #: Optional `I7_Index_ID` field.
-    i7_index_id: str | None = None
+    i7_index_id: Annotated[str | None, Field(default=None)]
     #: `index` field.
-    index: str
+    index: Annotated[str | None, Field(default=None)]
     #: Optional `I5_Index_ID` field.
-    i5_index_id: str | None = None
+    i5_index_id: Annotated[str | None, Field(default=None)]
     #: `index2` field.
-    index2: str | None = None
+    index2: Annotated[str | None, Field(default=None)]
     #: Optional `Sample_Project` field.
-    sample_project: str | None = None
+    sample_project: Annotated[str | None, Field(default=None)]
     #: Optional `Description` field.
-    description: str | None = None
+    description: Annotated[str | None, Field(default=None)]
 
-    #: List of header names in the sample sheet.
-    header_names: Annotated[list[str], Field(default_factory=list)]
-    #: Optional extra metadata.
+    #: Optional extra metadata for fields not explicitly defined.
     extra_metadata: Annotated[dict[str, str], Field(default_factory=dict)]
 
     #: Model configuration.
