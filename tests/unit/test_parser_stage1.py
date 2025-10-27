@@ -1,11 +1,17 @@
 """Unit tests for stage1 parser."""
 
+import itertools
+from pathlib import Path
+from typing import Any
+
 import pytest
+from syrupy.assertion import SnapshotAssertion
 
 from elsheeto.models.csv_stage1 import ParsedRawSheet, ParsedRawType
 from elsheeto.parser.common import (
     CaseConsistency,
     ColumnConsistency,
+    CsvDelimiter,
     ParserConfiguration,
 )
 from elsheeto.parser.stage1 import Parser, parse
@@ -338,3 +344,40 @@ TestKey,TestValue
         assert result.sheet_type == ParsedRawType.SECTIONED
         assert len(result.sections) == 1
         assert result.sections[0].name == "header"
+
+
+class TestParseFunctionSmokeTest:
+
+    path_data = Path(__file__).parent.parent / "data"
+    csv_files: list[Path] = sorted(path_data.glob("*/*.csv"))
+
+    delimiters = [CsvDelimiter.COMMA, CsvDelimiter.AUTO]
+
+    args = list(itertools.product(csv_files, delimiters))
+
+    @staticmethod
+    def idfn(value: Any) -> str:
+        """Return a test ID string value."""
+        if isinstance(value, Path):
+            return "_".join(str(value).rsplit("/")[-2:])
+        elif isinstance(value, CsvDelimiter):
+            return value.value
+        else:
+            raise ValueError("Unexpected value type in idfn")
+
+    @pytest.mark.parametrize("path,delim", args, ids=idfn)
+    def test_smoke_test(self, path: Path, delim: CsvDelimiter, snapshot_json: SnapshotAssertion):
+        """Run smoke test for all CSV files."""
+        # arrange
+
+        with path.open("r", encoding="utf-8") as f:
+            data = f.read()
+        config = ParserConfiguration(delimiter=delim)
+
+        # act
+
+        result = parse(data=data, config=config)
+
+        # assert
+
+        snapshot_json.assert_match(result.model_dump(mode="json"))
