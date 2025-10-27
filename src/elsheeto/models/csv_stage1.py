@@ -4,10 +4,11 @@ Stage 1 is raw CSV parsing and splitting into sections.  Here, only
 consistency checks of columns are made per-section or globally.
 """
 
-from enum import Enum
 from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field
+
+from elsheeto.models.common import ParsedSheetType
 
 
 class ParsedRawSection(BaseModel):
@@ -25,22 +26,13 @@ class ParsedRawSection(BaseModel):
     )
 
 
-class ParsedRawType(str, Enum):
-    """Resulting sheet type after raw CSV parsing in stage 1."""
-
-    #: Sectionless.
-    SECTIONLESS = "sectionless"
-    #: Multi-section sheet.
-    SECTIONED = "sectioned"
-
-
 class ParsedRawSheet(BaseModel):
     """Representation of a parsed raw sectioned CSV file."""
 
     #: Delimiter used in the file.
     delimiter: str
     #: Resulting sheet type.
-    sheet_type: ParsedRawType
+    sheet_type: ParsedSheetType
 
     #: Parsed sections in the sheet, a single one with `name` "" (empty string) if
     #: sectionless.

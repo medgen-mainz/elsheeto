@@ -7,7 +7,8 @@ from typing import Any
 import pytest
 from syrupy.assertion import SnapshotAssertion
 
-from elsheeto.models.csv_stage1 import ParsedRawSheet, ParsedRawType
+from elsheeto.models.common import ParsedSheetType
+from elsheeto.models.csv_stage1 import ParsedRawSheet
 from elsheeto.parser.common import (
     CaseConsistency,
     ColumnConsistency,
@@ -42,7 +43,7 @@ L11-00002_01,,TestPlate,B01
         result = parser.parse(data=data)
 
         assert result.delimiter == ","
-        assert result.sheet_type == ParsedRawType.SECTIONED
+        assert result.sheet_type == ParsedSheetType.SECTIONED
         assert len(result.sections) == 2
 
         # Check Header section
@@ -71,7 +72,7 @@ Sample_2,TTT,GGG,1
         result = parser.parse(data=data)
 
         assert result.delimiter == ","
-        assert result.sheet_type == ParsedRawType.SECTIONED
+        assert result.sheet_type == ParsedSheetType.SECTIONED
         assert len(result.sections) == 1
 
         samples_section = result.sections[0]
@@ -90,7 +91,7 @@ S2,Sample2,Proj1
         result = parser.parse(data=data)
 
         assert result.delimiter == ","
-        assert result.sheet_type == ParsedRawType.SECTIONLESS
+        assert result.sheet_type == ParsedSheetType.SECTIONLESS
         assert len(result.sections) == 1
 
         section = result.sections[0]
@@ -341,7 +342,7 @@ TestKey,TestValue
         result = parse(data=data, config=config)
 
         assert isinstance(result, ParsedRawSheet)
-        assert result.sheet_type == ParsedRawType.SECTIONED
+        assert result.sheet_type == ParsedSheetType.SECTIONED
         assert len(result.sections) == 1
         assert result.sections[0].name == "header"
 
