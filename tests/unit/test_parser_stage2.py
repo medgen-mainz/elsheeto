@@ -12,7 +12,7 @@ from elsheeto.models.common import ParsedSheetType
 from elsheeto.models.csv_stage1 import ParsedRawSection, ParsedRawSheet
 from elsheeto.models.csv_stage2 import ParsedSheet
 from elsheeto.parser.common import CaseConsistency, CsvDelimiter, ParserConfiguration
-from elsheeto.parser.stage2 import Parser, parse
+from elsheeto.parser.stage2 import Parser, from_stage1
 
 
 class TestParser:
@@ -444,7 +444,7 @@ class TestParseFunction:
         )
 
         config = ParserConfiguration()
-        result = parse(raw_sheet=raw_sheet, config=config)
+        result = from_stage1(raw_sheet=raw_sheet, config=config)
 
         assert isinstance(result, ParsedSheet)
         assert result.sheet_type == ParsedSheetType.SECTIONED
@@ -452,7 +452,7 @@ class TestParseFunction:
         assert result.data_section is not None
 
 
-class TestParseFunctionSmokeTest:
+class TestFromStage1FunctionSmokeTest:
 
     path_data = Path(__file__).parent.parent / "data"
     csv_files: list[Path] = sorted(path_data.glob("*/*.csv"))
@@ -479,11 +479,11 @@ class TestParseFunctionSmokeTest:
         with path.open("r", encoding="utf-8") as f:
             data = f.read()
         config = ParserConfiguration(delimiter=delim)
-        raw_sheet = parser_stage1.parse(data=data, config=config)
+        raw_sheet = parser_stage1.from_csv(data=data, config=config)
 
         # act
 
-        result = parse(raw_sheet=raw_sheet, config=config)
+        result = from_stage1(raw_sheet=raw_sheet, config=config)
 
         # assert
 

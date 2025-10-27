@@ -238,7 +238,7 @@ class Parser:
         )
 
 
-def parse(*, raw_sheet: ParsedRawSheet, config: ParserConfiguration) -> ParsedSheet:
+def from_stage1(*, raw_sheet: ParsedRawSheet, config: ParserConfiguration) -> ParsedSheet:
     """Convert raw sectioned data into structured content.
 
     Args:

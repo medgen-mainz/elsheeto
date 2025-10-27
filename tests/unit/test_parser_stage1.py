@@ -15,7 +15,7 @@ from elsheeto.parser.common import (
     CsvDelimiter,
     ParserConfiguration,
 )
-from elsheeto.parser.stage1 import Parser, parse
+from elsheeto.parser.stage1 import Parser, from_csv
 
 
 class TestParser:
@@ -339,7 +339,7 @@ Key,Value
 TestKey,TestValue
 """
         config = ParserConfiguration()
-        result = parse(data=data, config=config)
+        result = from_csv(data=data, config=config)
 
         assert isinstance(result, ParsedRawSheet)
         assert result.sheet_type == ParsedSheetType.SECTIONED
@@ -347,7 +347,7 @@ TestKey,TestValue
         assert result.sections[0].name == "header"
 
 
-class TestParseFunctionSmokeTest:
+class TestFromCsvFunctionSmokeTest:
 
     path_data = Path(__file__).parent.parent / "data"
     csv_files: list[Path] = sorted(path_data.glob("*/*.csv"))
@@ -377,7 +377,7 @@ class TestParseFunctionSmokeTest:
 
         # act
 
-        result = parse(data=data, config=config)
+        result = from_csv(data=data, config=config)
 
         # assert
 

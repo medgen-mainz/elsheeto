@@ -289,7 +289,7 @@ class Parser:
                             )
 
 
-def parse(*, data: str, config: ParserConfiguration) -> ParsedRawSheet:
+def from_csv(*, data: str, config: ParserConfiguration) -> ParsedRawSheet:
     """Parse the given sectioned CSV data.
 
     Args:

@@ -528,7 +528,7 @@ class TestParseFunctionInterface:
 
     def test_parse_function(self):
         """Test the module-level parse function."""
-        from elsheeto.parser.illumina_v1 import parse
+        from elsheeto.parser.illumina_v1 import from_stage2
 
         config = ParserConfiguration()
 
@@ -538,7 +538,7 @@ class TestParseFunctionInterface:
 
         parsed_sheet = _create_parsed_sheet(header_sections=[header_section], data_section=data_section)
 
-        sample_sheet = parse(parsed_sheet=parsed_sheet, config=config)
+        sample_sheet = from_stage2(parsed_sheet=parsed_sheet, config=config)
 
         assert isinstance(sample_sheet, IlluminaSampleSheet)
         assert sample_sheet.header.iem_file_version == "4"
@@ -577,17 +577,17 @@ class TestSmokeTestWithRealData:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
 
-        raw_sheet = stage1.parse(data=content, config=config)
+        raw_sheet = stage1.from_csv(data=content, config=config)
         assert raw_sheet is not None
 
         # Stage 2: Convert to structured format
-        structured_sheet = stage2.parse(raw_sheet=raw_sheet, config=config)
+        structured_sheet = stage2.from_stage1(raw_sheet=raw_sheet, config=config)
         assert structured_sheet is not None
         assert len(structured_sheet.header_sections) > 0
         assert structured_sheet.data_section is not None
 
         # Stage 3: Convert to Illumina v1 specific format
-        illumina_sheet = stage3.parse(parsed_sheet=structured_sheet, config=config)
+        illumina_sheet = stage3.from_stage2(parsed_sheet=structured_sheet, config=config)
         assert illumina_sheet is not None
         assert isinstance(illumina_sheet, IlluminaSampleSheet)
 
