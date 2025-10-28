@@ -10,7 +10,12 @@ The parser determines section types based on content structure and known pattern
 import logging
 
 from elsheeto.models.csv_stage1 import ParsedRawSection, ParsedRawSheet
-from elsheeto.models.csv_stage2 import DataSection, HeaderSection, ParsedSheet
+from elsheeto.models.csv_stage2 import (
+    DataSection,
+    HeaderRow,
+    HeaderSection,
+    ParsedSheet,
+)
 from elsheeto.parser.common import ParserConfiguration
 
 #: The module logger.
@@ -175,8 +180,6 @@ class Parser:
         Returns:
             HeaderSection object or None if section is empty.
         """
-        from elsheeto.models.csv_stage2 import HeaderRow
-
         rows = []
 
         for row in section.data:

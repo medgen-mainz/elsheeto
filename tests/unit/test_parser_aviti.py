@@ -10,7 +10,7 @@ from elsheeto.models.csv_stage2 import (
     HeaderSection,
     ParsedSheet,
 )
-from elsheeto.parser.aviti import Parser
+from elsheeto.parser.aviti import Parser, from_stage2
 from elsheeto.parser.common import ParserConfiguration
 
 
@@ -423,8 +423,6 @@ class TestParseFunctionInterface:
 
     def test_parse_function(self):
         """Test the module-level parse function."""
-        from elsheeto.parser.aviti import from_stage2
-
         config = ParserConfiguration()
 
         data_section = _create_data_section(
