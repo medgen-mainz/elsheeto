@@ -7,6 +7,7 @@ import pytest
 import elsheeto.parser.illumina_v1 as stage3
 import elsheeto.parser.stage1 as stage1
 import elsheeto.parser.stage2 as stage2
+from elsheeto.models.illumina_v1 import IlluminaSampleSheet
 from elsheeto.parser.common import ParserConfiguration
 
 
@@ -349,8 +350,6 @@ class TestIlluminaV1EndToEndPipeline:
         This test verifies that stage 1 -> stage 2 -> stage 3 parsing works
         correctly with real Illumina v1 sample sheet files.
         """
-        from elsheeto.models.illumina_v1 import IlluminaSampleSheet
-
         config = ParserConfiguration()
         path_data = Path(__file__).parent.parent / "data"
         file_path = path_data / illumina_file

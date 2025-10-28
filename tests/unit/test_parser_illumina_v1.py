@@ -13,7 +13,7 @@ from elsheeto.models.illumina_v1 import (
     IlluminaSampleSheet,
 )
 from elsheeto.parser.common import ParserConfiguration
-from elsheeto.parser.illumina_v1 import Parser
+from elsheeto.parser.illumina_v1 import Parser, from_stage2
 
 
 def _create_data_section(headers: list[str] | None = None, data: list[list[str]] | None = None) -> DataSection:
@@ -610,8 +610,6 @@ class TestParseFunctionInterface:
 
     def test_parse_function(self):
         """Test the module-level parse function."""
-        from elsheeto.parser.illumina_v1 import from_stage2
-
         config = ParserConfiguration()
 
         header_section = HeaderSection(

@@ -7,6 +7,7 @@ import pytest
 import elsheeto.parser.aviti as stage3
 import elsheeto.parser.stage1 as stage1
 import elsheeto.parser.stage2 as stage2
+from elsheeto.models.aviti import AvitiSheet
 from elsheeto.parser.common import ParserConfiguration
 
 
@@ -27,8 +28,6 @@ class TestAvitiEndToEndPipeline:
         This test verifies that stage 1 -> stage 2 -> stage 3 parsing works
         correctly with real Aviti sample sheet files.
         """
-        from elsheeto.models.aviti import AvitiSheet
-
         config = ParserConfiguration()
         path_data = Path(__file__).parent.parent / "data"
         file_path = path_data / aviti_file
