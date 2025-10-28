@@ -1,0 +1,44 @@
+{
+  "data_section": {
+    "data": [
+      [
+        "Sample_1",
+        "CCC",
+        "",
+        "1",
+        "Sample_1_metadata"
+      ],
+      [
+        "Sample_2",
+        "TTT",
+        "",
+        "1",
+        "Sample_2_metadata"
+      ],
+      [
+        "Sample_3",
+        "AAA",
+        "",
+        "1",
+        "Sample_3_metadata"
+      ]
+    ],
+    "header_to_index": {
+      "custom_metadata": 4,
+      "index1": 1,
+      "index2": 2,
+      "lane": 3,
+      "samplename": 0
+    },
+    "headers": [
+      "samplename",
+      "index1",
+      "index2",
+      "lane",
+      "custom_metadata"
+    ]
+  },
+  "delimiter": ",",
+  "header_sections": [],
+  "sheet_type": "sectioned"
+}

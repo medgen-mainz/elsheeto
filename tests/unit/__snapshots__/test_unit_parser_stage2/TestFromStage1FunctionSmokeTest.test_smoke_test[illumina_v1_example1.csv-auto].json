@@ -1,0 +1,254 @@
+{
+  "data_section": {
+    "data": [
+      [
+        "L11-00001_01",
+        "",
+        "",
+        "",
+        "A11",
+        "AD81",
+        "ATCACTCACA",
+        "AD81",
+        "TTACGGTAAC",
+        "",
+        "NGS_Seq1_20111111_01"
+      ],
+      [
+        "L11-00002_01",
+        "",
+        "",
+        "",
+        "B11",
+        "AD82",
+        "CGGAGGTAGA",
+        "AD82",
+        "TTCAGATGGA",
+        "",
+        "NGS_Seq1_20111111_01"
+      ],
+      [
+        "L11-00003_01",
+        "",
+        "",
+        "",
+        "C11",
+        "AD83",
+        "GAGTTGACAA",
+        "AD83",
+        "TAGCATCTGT",
+        "",
+        "NGS_Seq1_20111111_01"
+      ],
+      [
+        "L11-00004_01",
+        "",
+        "",
+        "",
+        "D11",
+        "AD84",
+        "GCCGAACTTG",
+        "AD84",
+        "GGACGAGATC",
+        "",
+        "NGS_Seq1_20111111_01"
+      ]
+    ],
+    "header_to_index": {
+      "description": 10,
+      "i5_index_id": 7,
+      "i7_index_id": 5,
+      "index": 6,
+      "index2": 8,
+      "index_plate_well": 4,
+      "sample_id": 0,
+      "sample_name": 1,
+      "sample_plate": 2,
+      "sample_project": 9,
+      "sample_well": 3
+    },
+    "headers": [
+      "sample_id",
+      "sample_name",
+      "sample_plate",
+      "sample_well",
+      "index_plate_well",
+      "i7_index_id",
+      "index",
+      "i5_index_id",
+      "index2",
+      "sample_project",
+      "description"
+    ]
+  },
+  "delimiter": ",",
+  "header_sections": [
+    {
+      "name": "header",
+      "rows": [
+        [
+          "IEMFileVersion",
+          "5",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Experiment Name",
+          "MyExperimentName",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Date",
+          "11.11.2011",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Workflow",
+          "GenerateFASTQ",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Application",
+          "NextSeq FASTQ Only",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Instrument Type",
+          "NovaSeq/MiSeq",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Assay",
+          "TruSeq DNA Exome Enrichment",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Index Adapters",
+          "TruSeq DNA CD Indexes (96 Indexes)",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Description",
+          "The Description",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Chemistry",
+          "Amplicon",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      ]
+    },
+    {
+      "name": "reads",
+      "rows": [
+        [
+          "149",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "149",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      ]
+    }
+  ],
+  "sheet_type": "sectioned"
+}

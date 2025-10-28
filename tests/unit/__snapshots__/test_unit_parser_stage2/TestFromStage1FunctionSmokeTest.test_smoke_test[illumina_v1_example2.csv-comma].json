@@ -1,0 +1,207 @@
+{
+  "data_section": {
+    "data": [
+      [
+        "1",
+        "L11-01111_I01",
+        "",
+        "",
+        "5GS001-A1",
+        "TTCGCTCA",
+        "DGS08",
+        "TAATGCGC",
+        ""
+      ],
+      [
+        "2",
+        "L11-01112_I01",
+        "",
+        "",
+        "5GS002-B1",
+        "TATGGCAC",
+        "DGS08",
+        "TAATGCGC",
+        ""
+      ]
+    ],
+    "header_to_index": {
+      "i7_index_id": 6,
+      "index": 5,
+      "index2": 7,
+      "inline_id": 4,
+      "sample_id": 0,
+      "sample_name": 1,
+      "sample_plate": 2,
+      "sample_project": 8,
+      "sample_well": 3
+    },
+    "headers": [
+      "sample_id",
+      "sample_name",
+      "sample_plate",
+      "sample_well",
+      "inline_id",
+      "index",
+      "i7_index_id",
+      "index2",
+      "sample_project"
+    ]
+  },
+  "delimiter": ",",
+  "header_sections": [
+    {
+      "name": "header",
+      "rows": [
+        [
+          "IEMFileVersion",
+          "4",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Investigator Name",
+          "JS",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Experiment Name",
+          "MyExperimentName",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Date",
+          "10.10.2025",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Workflow",
+          "GenerateFASTQ",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Application",
+          "FASTQ Only",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Assay",
+          "TruSeq HT",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Description",
+          "MyDescription",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Chemistry",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Run",
+          "111111_M00001_0111_000000000-M111P",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      ]
+    },
+    {
+      "name": "reads",
+      "rows": [
+        [
+          "150",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "8",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "130",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      ]
+    }
+  ],
+  "sheet_type": "sectioned"
+}

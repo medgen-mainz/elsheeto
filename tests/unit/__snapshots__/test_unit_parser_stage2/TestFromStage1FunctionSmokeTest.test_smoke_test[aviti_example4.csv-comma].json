@@ -1,0 +1,223 @@
+{
+  "data_section": {
+    "data": [
+      [
+        "PhiX",
+        "ATGTCGCTAG",
+        "CTAGCTCGTA",
+        "1+2",
+        ""
+      ],
+      [
+        "PhiX",
+        "CACAGATCGT",
+        "ACGAGAGTCT",
+        "1+2",
+        ""
+      ],
+      [
+        "PhiX",
+        "GCACATAGTC",
+        "GACTACTAGC",
+        "1+2",
+        ""
+      ],
+      [
+        "PhiX",
+        "TGTGTCGACA",
+        "TGTCTGACAG",
+        "1+2",
+        ""
+      ],
+      [
+        "ExampleSample_1",
+        "AAAAAAAAAA",
+        "GGGGGGGGGG",
+        "1+2",
+        ""
+      ],
+      [
+        "ExampleSample_2",
+        "TTTTTTTTTT",
+        "CCCCCCCCCC",
+        "1+2",
+        ""
+      ]
+    ],
+    "header_to_index": {
+      "index1": 1,
+      "index2": 2,
+      "lane": 3,
+      "project": 4,
+      "samplename": 0
+    },
+    "headers": [
+      "samplename",
+      "index1",
+      "index2",
+      "lane",
+      "project"
+    ]
+  },
+  "delimiter": ",",
+  "header_sections": [
+    {
+      "name": "settings",
+      "rows": [
+        [
+          "SettingName",
+          "Value",
+          "Lane",
+          "",
+          ""
+        ],
+        [
+          "SpikeInAsUnassigned",
+          "FALSE",
+          "",
+          "",
+          ""
+        ],
+        [
+          "R1FastQMask",
+          "R1:Y*N",
+          "1+2",
+          "",
+          ""
+        ],
+        [
+          "R2FastQMask",
+          "R2:Y*N",
+          "1+2",
+          "",
+          ""
+        ],
+        [
+          "I1Mask",
+          "I1:Y*",
+          "1+2",
+          "",
+          ""
+        ],
+        [
+          "I1Fastq",
+          "FALSE",
+          "1+2",
+          "",
+          ""
+        ],
+        [
+          "I1MismatchThreshold",
+          "1",
+          "1+2",
+          "",
+          ""
+        ],
+        [
+          "I2Mask",
+          "I2:Y*",
+          "1+2",
+          "",
+          ""
+        ],
+        [
+          "I2Fastq",
+          "FALSE",
+          "1+2",
+          "",
+          ""
+        ],
+        [
+          "I2MismatchThreshold",
+          "1",
+          "1+2",
+          "",
+          ""
+        ],
+        [
+          "UmiMask",
+          "I1:N*",
+          " 1+2",
+          "",
+          ""
+        ],
+        [
+          "UmiFastQ",
+          "FALSE",
+          "1+2",
+          "",
+          ""
+        ],
+        [
+          "AdapterTrimType",
+          " Paired-End",
+          " 1+2",
+          "",
+          ""
+        ],
+        [
+          "R1Adapter",
+          "",
+          "1+2",
+          "",
+          ""
+        ],
+        [
+          "R1AdapterTrim",
+          "FALSE",
+          "1+2",
+          "",
+          ""
+        ],
+        [
+          "R1AdapterNMask",
+          "FALSE",
+          "1+2",
+          "",
+          ""
+        ],
+        [
+          "R2Adapter",
+          "",
+          "1+2",
+          "",
+          ""
+        ],
+        [
+          "R2AdapterTrim",
+          "FALSE",
+          "1+2",
+          "",
+          ""
+        ],
+        [
+          "R2AdapterNMask",
+          "FALSE",
+          "1+2",
+          "",
+          ""
+        ]
+      ]
+    },
+    {
+      "name": "runvalues",
+      "rows": [
+        [
+          "Keyname",
+          " Value",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Example-Custom-Key",
+          "Additional metadata can be added as a key-value pair.",
+          "",
+          "",
+          ""
+        ]
+      ]
+    }
+  ],
+  "sheet_type": "sectioned"
+}

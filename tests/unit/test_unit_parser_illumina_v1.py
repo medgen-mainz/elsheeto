@@ -5,7 +5,6 @@ import pytest
 from elsheeto.models.common import ParsedSheetType
 from elsheeto.models.csv_stage2 import (
     DataSection,
-    HeaderRow,
     HeaderSection,
     ParsedSheet,
 )
@@ -62,17 +61,17 @@ class TestParseHeader:
         header_section = HeaderSection(
             name="header",
             rows=[
-                HeaderRow(key="IEMFileVersion", value="4"),
-                HeaderRow(key="Investigator Name", value="John Doe"),
-                HeaderRow(key="Experiment Name", value="Test Experiment"),
-                HeaderRow(key="Date", value="2023-01-01"),
-                HeaderRow(key="Workflow", value="GenerateFASTQ"),
-                HeaderRow(key="Application", value="FASTQ Only"),
-                HeaderRow(key="Instrument Type", value="MiSeq"),
-                HeaderRow(key="Assay", value="TruSeq HT"),
-                HeaderRow(key="Index Adapters", value="TruSeq HT"),
-                HeaderRow(key="Description", value="Test description"),
-                HeaderRow(key="Chemistry", value="Amplicon"),
+                ["IEMFileVersion", "4"],
+                ["Investigator Name", "John Doe"],
+                ["Experiment Name", "Test Experiment"],
+                ["Date", "2023-01-01"],
+                ["Workflow", "GenerateFASTQ"],
+                ["Application", "FASTQ Only"],
+                ["Instrument Type", "MiSeq"],
+                ["Assay", "TruSeq HT"],
+                ["Index Adapters", "TruSeq HT"],
+                ["Description", "Test description"],
+                ["Chemistry", "Amplicon"],
             ],
         )
 
@@ -100,9 +99,9 @@ class TestParseHeader:
         header_section = HeaderSection(
             name="header",
             rows=[
-                HeaderRow(key="iemfileversion", value="4"),
-                HeaderRow(key="INVESTIGATOR NAME", value="Jane Smith"),
-                HeaderRow(key="experiment name", value="Mixed Case Test"),
+                ["iemfileversion", "4"],
+                ["INVESTIGATOR NAME", "Jane Smith"],
+                ["experiment name", "Mixed Case Test"],
             ],
         )
 
@@ -122,10 +121,10 @@ class TestParseHeader:
         header_section = HeaderSection(
             name="header",
             rows=[
-                HeaderRow(key="IEMFileVersion", value="4"),
-                HeaderRow(key="Investigator Name", value="John Doe"),
-                HeaderRow(key="Custom Field", value="Custom Value"),
-                HeaderRow(key="Another Field", value="Another Value"),
+                ["IEMFileVersion", "4"],
+                ["Investigator Name", "John Doe"],
+                ["Custom Field", "Custom Value"],
+                ["Another Field", "Another Value"],
             ],
         )
 
@@ -149,10 +148,10 @@ class TestParseHeader:
             HeaderSection(
                 name="header",
                 rows=[
-                    HeaderRow(key="IEMFileVersion", value="4"),
-                    HeaderRow(key="Investigator Name", value="John Doe"),
-                    HeaderRow(key="Experiment Name", value="Test Experiment"),
-                    HeaderRow(key="Date", value="2023-01-01"),
+                    ["IEMFileVersion", "4"],
+                    ["Investigator Name", "John Doe"],
+                    ["Experiment Name", "Test Experiment"],
+                    ["Date", "2023-01-01"],
                 ],
             ),
         ]
@@ -200,7 +199,7 @@ class TestParseReads:
         config = ParserConfiguration()
         parser = Parser(config)
 
-        reads_section = HeaderSection(name="reads", rows=[HeaderRow(key="151", value="")])
+        reads_section = HeaderSection(name="reads", rows=[["151", ""]])
 
         parsed_sheet = _create_parsed_sheet(header_sections=[reads_section])
 
@@ -214,9 +213,7 @@ class TestParseReads:
         config = ParserConfiguration()
         parser = Parser(config)
 
-        reads_section = HeaderSection(
-            name="reads", rows=[HeaderRow(key="151", value=""), HeaderRow(key="151", value="")]
-        )
+        reads_section = HeaderSection(name="reads", rows=[["151", ""], ["151", ""]])
 
         parsed_sheet = _create_parsed_sheet(header_sections=[reads_section])
 
@@ -233,8 +230,8 @@ class TestParseReads:
         header_section = HeaderSection(
             name="header",
             rows=[
-                HeaderRow(key="IEMFileVersion", value="4"),
-                HeaderRow(key="Investigator Name", value="John Doe"),
+                ["IEMFileVersion", "4"],
+                ["Investigator Name", "John Doe"],
             ],
         )
 
@@ -252,8 +249,8 @@ class TestParseReads:
         reads_section = HeaderSection(
             name="reads",
             rows=[
-                HeaderRow(key="151", value=""),  # Valid row
-                HeaderRow(key="SomeKey", value="SomeValue"),  # Invalid row (not empty, not key-only)
+                ["151", ""],  # Valid row
+                ["SomeKey", "SomeValue"],  # Invalid row (not empty, not key-only)
             ],
         )
 
@@ -272,7 +269,7 @@ class TestParseReads:
         reads_section = HeaderSection(
             name="reads",
             rows=[
-                HeaderRow(key="abc", value=""),  # Invalid non-numeric key
+                ["abc", ""],  # Invalid non-numeric key
             ],
         )
 
@@ -309,8 +306,8 @@ class TestParseSettings:
         settings_section = HeaderSection(
             name="settings",
             rows=[
-                HeaderRow(key="SettingOption1", value="Value1"),
-                HeaderRow(key="ConfigParameter", value="Value2"),
+                ["SettingOption1", "Value1"],
+                ["ConfigParameter", "Value2"],
             ],
         )
 
@@ -329,8 +326,8 @@ class TestParseSettings:
         header_section = HeaderSection(
             name="header",
             rows=[
-                HeaderRow(key="IEMFileVersion", value="4"),
-                HeaderRow(key="Investigator Name", value="John Doe"),
+                ["IEMFileVersion", "4"],
+                ["Investigator Name", "John Doe"],
             ],
         )
 
@@ -553,15 +550,15 @@ class TestParseComplete:
         header_section = HeaderSection(
             name="header",
             rows=[
-                HeaderRow(key="IEMFileVersion", value="4"),
-                HeaderRow(key="Investigator Name", value="John Doe"),
-                HeaderRow(key="Experiment Name", value="Test Experiment"),
-                HeaderRow(key="Date", value="2023-01-01"),
-                HeaderRow(key="Workflow", value="GenerateFASTQ"),
+                ["IEMFileVersion", "4"],
+                ["Investigator Name", "John Doe"],
+                ["Experiment Name", "Test Experiment"],
+                ["Date", "2023-01-01"],
+                ["Workflow", "GenerateFASTQ"],
             ],
         )
 
-        reads_section = HeaderSection(name="reads", rows=[HeaderRow(key="151", value="")])
+        reads_section = HeaderSection(name="reads", rows=[["151", ""]])
 
         data_section = _create_data_section(
             headers=["Sample_ID", "Sample_Name", "I7_Index_ID", "index"],
@@ -589,7 +586,7 @@ class TestParseComplete:
         config = ParserConfiguration()
         parser = Parser(config)
 
-        header_section = HeaderSection(name="header", rows=[HeaderRow(key="IEMFileVersion", value="4")])
+        header_section = HeaderSection(name="header", rows=[["IEMFileVersion", "4"]])
 
         data_section = _create_data_section(headers=["Sample_ID"], data=[["Sample1"]])
 
@@ -615,8 +612,8 @@ class TestParseFunctionInterface:
         header_section = HeaderSection(
             name="header",
             rows=[
-                HeaderRow(key="IEMFileVersion", value="4"),
-                HeaderRow(key="Investigator Name", value="John Doe"),
+                ["IEMFileVersion", "4"],
+                ["Investigator Name", "John Doe"],
             ],
         )
 

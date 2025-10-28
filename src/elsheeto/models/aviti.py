@@ -101,15 +101,67 @@ class AvitiRunValues(BaseModel):
     model_config = ConfigDict(frozen=True)
 
 
-class AvitiSettings(BaseModel):
-    """Representation of the `Settings` section of an Aviti sample sheet."""
+class AvitiSettingEntry(BaseModel):
+    """Representation of a single setting entry that may be lane-specific."""
 
-    #: Key-value pairs from the Settings section.
-    data: dict[str, str] = Field(default_factory=dict)
+    #: Setting name/key.
+    name: str
+    #: Setting value.
+    value: str
+    #: Optional lane specification (e.g., "1+2", "1", "2", etc.).
+    lane: str | None = None
+
+    model_config = ConfigDict(frozen=True)
+
+
+class AvitiSettings(BaseModel):
+    """Representation of the `Settings` section of an Aviti sample sheet.
+
+    Supports both simple key-value pairs and lane-specific settings with 3-column structure.
+    """
+
+    #: List of setting entries (may include lane-specific settings).
+    settings: list[AvitiSettingEntry] = Field(default_factory=list)
     #: Optional extra metadata.
     extra_metadata: dict[str, str] = Field(default_factory=dict)
 
     model_config = ConfigDict(frozen=True)
+
+    @property
+    def data(self) -> dict[str, str]:
+        """Get simple key-value pairs for backward compatibility.
+
+        For lane-specific settings, only returns the first occurrence of each setting name.
+        """
+        result = {}
+        for setting in self.settings:
+            if setting.name not in result:
+                result[setting.name] = setting.value
+        return result
+
+    def get_settings_by_lane(self, lane: str | None = None) -> dict[str, str]:
+        """Get settings filtered by lane specification.
+
+        Args:
+            lane: Lane specification to filter by (e.g., "1", "2", "1+2").
+                  If None, returns settings without lane specification.
+
+        Returns:
+            Dictionary of setting name to value for the specified lane.
+        """
+        result = {}
+        for setting in self.settings:
+            if setting.lane == lane:
+                result[setting.name] = setting.value
+        return result
+
+    def get_all_lanes(self) -> set[str]:
+        """Get all unique lane specifications used in settings.
+
+        Returns:
+            Set of all lane specifications (excluding None).
+        """
+        return {setting.lane for setting in self.settings if setting.lane is not None}
 
 
 class AvitiSheet(BaseModel):
