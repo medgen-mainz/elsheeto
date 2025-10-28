@@ -308,12 +308,10 @@ dev = [
     { name = "pytest-cache" },
     { name = "pytest-cov" },
     { name = "pytest-sugar" },
-    { name = "syrupy" },
-]
-docs = [
     { name = "sphinx" },
     { name = "sphinx-autodoc-typehints" },
     { name = "sphinx-rtd-theme" },
+    { name = "syrupy" },
 ]
 
 [package.metadata]
@@ -335,12 +333,10 @@ dev = [
     { name = "pytest-cov" },
     { name = "pytest-cov", specifier = ">=2.4.0" },
     { name = "pytest-sugar", specifier = ">=0.8.0" },
-    { name = "syrupy", specifier = ">=5.0.0" },
-]
-docs = [
     { name = "sphinx", specifier = ">=7.0.0" },
     { name = "sphinx-autodoc-typehints", specifier = ">=1.20.0" },
     { name = "sphinx-rtd-theme", specifier = ">=2.0.0" },
+    { name = "syrupy", specifier = ">=5.0.0" },
 ]
 
 [[package]]

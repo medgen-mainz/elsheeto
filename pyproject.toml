@@ -59,23 +59,23 @@ feature = [
 
 [tool.hatch.envs.quality.scripts]
 check = [
-  "black --check --diff --preview src tests",
-  "ruff check src tests",
+  "black --check --diff --preview src tests examples",
+  "ruff check src tests examples",
 ]
 format = [
-  "black src tests",
-  "ruff check --fix --unsafe-fixes src tests",
+  "black src tests examples",
+  "ruff check --fix --unsafe-fixes src tests examples",
   "check",
 ]
 typecheck = [
   """
   pyright --pythonpath="$(uv run --active hatch run quality:python -c 'import sys; print(sys.executable)')" \
-    {args:src/ tests/}
+    {args:src/ tests/ examples/}
   """
 ]
 
 [tool.pyright]
-include = ["src/elsheeto"]
+include = ["src/elsheeto", "examples"]
 exclude = [
     "**/node_modules",
     "**/__pycache__",

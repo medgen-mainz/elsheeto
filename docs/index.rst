@@ -1,5 +1,5 @@
-Welcome to elsheeto's documentation!
-====================================
+Elsheeto Docs
+=============
 
 .. image:: https://img.shields.io/badge/python-3.13+-blue.svg
    :target: https://python.org
@@ -70,10 +70,24 @@ Table of Contents
 -----------------
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 1
+    :caption: Contents
 
-   api
+    self
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Examples
+
+    examples
+    examples_aviti
+    examples_illumina_v1
+
+.. toctree::
+    :maxdepth: 1
+    :caption: API Docs
+
+    api
 
 Indices and tables
 ==================
