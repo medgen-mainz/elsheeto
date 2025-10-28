@@ -12,10 +12,12 @@ import sys
 # Add the src directory to the Python path
 sys.path.insert(0, os.path.abspath('../src'))
 
+from elsheeto import __version__ as elsheeto_version
+
 project = 'elsheeto'
-copyright = '2025, medgen-mainz'
-author = 'medgen-mainz'
-release = '0.1.0'
+copyright = '2025, Limbach Genetics eGbR'
+author = 'Manuel Holtgrewe <manuel.holtgrewe@medgen-mainz.de>'
+release = elsheeto_version
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
