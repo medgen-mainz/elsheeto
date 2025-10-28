@@ -52,63 +52,154 @@
     {
       "name": "header",
       "rows": [
-        {
-          "key": "iemfileversion",
-          "value": "4"
-        },
-        {
-          "key": "investigator name",
-          "value": "JS"
-        },
-        {
-          "key": "experiment name",
-          "value": "MyExperimentName"
-        },
-        {
-          "key": "date",
-          "value": "10.10.2025"
-        },
-        {
-          "key": "workflow",
-          "value": "GenerateFASTQ"
-        },
-        {
-          "key": "application",
-          "value": "FASTQ Only"
-        },
-        {
-          "key": "assay",
-          "value": "TruSeq HT"
-        },
-        {
-          "key": "description",
-          "value": "MyDescription"
-        },
-        {
-          "key": "chemistry",
-          "value": ""
-        },
-        {
-          "key": "run",
-          "value": "111111_M00001_0111_000000000-M111P"
-        }
+        [
+          "IEMFileVersion",
+          "4",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Investigator Name",
+          "JS",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Experiment Name",
+          "MyExperimentName",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Date",
+          "10.10.2025",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Workflow",
+          "GenerateFASTQ",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Application",
+          "FASTQ Only",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Assay",
+          "TruSeq HT",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Description",
+          "MyDescription",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Chemistry",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Run",
+          "111111_M00001_0111_000000000-M111P",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
       ]
     },
     {
       "name": "reads",
       "rows": [
-        {
-          "key": "150",
-          "value": ""
-        },
-        {
-          "key": "8",
-          "value": ""
-        },
-        {
-          "key": "130",
-          "value": ""
-        }
+        [
+          "150",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "8",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "130",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
       ]
     }
   ],

@@ -10,12 +10,7 @@ The parser determines section types based on content structure and known pattern
 import logging
 
 from elsheeto.models.csv_stage1 import ParsedRawSection, ParsedRawSheet
-from elsheeto.models.csv_stage2 import (
-    DataSection,
-    HeaderRow,
-    HeaderSection,
-    ParsedSheet,
-)
+from elsheeto.models.csv_stage2 import DataSection, HeaderSection, ParsedSheet
 from elsheeto.parser.common import ParserConfiguration
 
 #: The module logger.
@@ -172,7 +167,7 @@ class Parser:
         return True
 
     def _convert_to_header_section(self, section: ParsedRawSection) -> HeaderSection | None:
-        """Convert a raw section to a header section (key-value pairs and standalone values).
+        """Convert a raw section to a header section (preserving original row structure).
 
         Args:
             section: The raw section to convert.
@@ -186,24 +181,8 @@ class Parser:
             if not row or all(cell.strip() == "" for cell in row):
                 continue  # Skip empty rows
 
-            # Count non-empty cells
-            non_empty_cells = [cell.strip() for cell in row if cell.strip()]
-
-            # Validation: fail if more than 2 non-empty fields
-            if len(non_empty_cells) > 2:
-                raise ValueError(f"Header row contains more than 2 non-empty fields: {non_empty_cells}")
-
-            # Ensure we have at least 2 cells (pad with empty strings if needed)
-            padded_row = row + [""] * (2 - len(row))
-
-            key = padded_row[0].strip()
-            value = padded_row[1].strip()
-
-            # Apply case transformations if configured
-            if not self.config.key_case.is_case_sensitive():
-                key = key.lower()
-
-            rows.append(HeaderRow(key=key, value=value))
+            # Simply preserve the row as-is (no more validation on number of fields)
+            rows.append(row)
 
         return HeaderSection(name=section.name.lower(), rows=rows) if rows else None
 

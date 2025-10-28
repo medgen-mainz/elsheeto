@@ -23,35 +23,45 @@
     {
       "name": "header",
       "rows": [
-        {
-          "key": "iemfileversion",
-          "value": "4"
-        },
-        {
-          "key": "experiment name",
-          "value": "Read Format Test 1"
-        },
-        {
-          "key": "date",
-          "value": "2025-10-28"
-        },
-        {
-          "key": "workflow",
-          "value": "GenerateFASTQ"
-        }
+        [
+          "IEMFileVersion",
+          "4",
+          "",
+          ""
+        ],
+        [
+          "Experiment Name",
+          "Read Format Test 1",
+          "",
+          ""
+        ],
+        [
+          "Date",
+          "2025-10-28",
+          "",
+          ""
+        ],
+        [
+          "Workflow",
+          "GenerateFASTQ",
+          "",
+          ""
+        ]
       ]
     },
     {
       "name": "reads",
       "rows": [
-        {
-          "key": "151",
-          "value": ""
-        },
-        {
-          "key": "151",
-          "value": ""
-        }
+        [
+          "151",
+          "",
+          ""
+        ],
+        [
+          "151",
+          "",
+          ""
+        ]
       ]
     }
   ],

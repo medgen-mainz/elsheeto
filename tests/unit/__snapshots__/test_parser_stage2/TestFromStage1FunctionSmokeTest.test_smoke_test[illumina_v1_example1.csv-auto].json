@@ -86,59 +86,167 @@
     {
       "name": "header",
       "rows": [
-        {
-          "key": "iemfileversion",
-          "value": "5"
-        },
-        {
-          "key": "experiment name",
-          "value": "MyExperimentName"
-        },
-        {
-          "key": "date",
-          "value": "11.11.2011"
-        },
-        {
-          "key": "workflow",
-          "value": "GenerateFASTQ"
-        },
-        {
-          "key": "application",
-          "value": "NextSeq FASTQ Only"
-        },
-        {
-          "key": "instrument type",
-          "value": "NovaSeq/MiSeq"
-        },
-        {
-          "key": "assay",
-          "value": "TruSeq DNA Exome Enrichment"
-        },
-        {
-          "key": "index adapters",
-          "value": "TruSeq DNA CD Indexes (96 Indexes)"
-        },
-        {
-          "key": "description",
-          "value": "The Description"
-        },
-        {
-          "key": "chemistry",
-          "value": "Amplicon"
-        }
+        [
+          "IEMFileVersion",
+          "5",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Experiment Name",
+          "MyExperimentName",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Date",
+          "11.11.2011",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Workflow",
+          "GenerateFASTQ",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Application",
+          "NextSeq FASTQ Only",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Instrument Type",
+          "NovaSeq/MiSeq",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Assay",
+          "TruSeq DNA Exome Enrichment",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Index Adapters",
+          "TruSeq DNA CD Indexes (96 Indexes)",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Description",
+          "The Description",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Chemistry",
+          "Amplicon",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
       ]
     },
     {
       "name": "reads",
       "rows": [
-        {
-          "key": "149",
-          "value": ""
-        },
-        {
-          "key": "149",
-          "value": ""
-        }
+        [
+          "149",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "149",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
       ]
     }
   ],
