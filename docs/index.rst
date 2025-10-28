@@ -1,12 +1,6 @@
 Elsheeto Docs
 =============
 
-.. image:: https://img.shields.io/badge/python-3.13+-blue.svg
-   :target: https://python.org
-
-.. image:: https://img.shields.io/github/license/medgen-mainz/elsheeto.svg
-   :target: https://github.com/medgen-mainz/elsheeto/blob/main/LICENSE
-
 **elsheeto** is a Python library for parsing NGS sample sheets from Illumina and Element Biosciences Aviti platforms.
 It provides type-annotated, validated models using Pydantic and supports a three-stage parsing architecture for robust data processing.
 
