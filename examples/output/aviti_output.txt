@@ -1,0 +1,78 @@
+Reading Aviti sample sheet: examples/aviti_example1.csv
+=================================================================
+RUN VALUES:
+-----------------------------------
+  keyname: Value
+  example-custom-key: Additional metadata can be added as a key-value pair.
+
+SETTINGS:
+-----------------------------------
+  General Settings:
+    settingname: Value
+    spikeinasunassigned: FALSE
+
+  Sequencing Configuration:
+    r1fastqmask: R1:Y*N
+    r2fastqmask: R2:Y*N
+    i1mask: I1:Y*
+    i1fastq: FALSE
+    i1mismatchthreshold: 1
+    i2mask: I2:Y*
+    i2fastq: FALSE
+    i2mismatchthreshold: 1
+    umimask: I1:N*
+    umifastq: FALSE
+    r1adapternmask: FALSE
+    r2adapternmask: FALSE
+
+  Adapter Settings:
+    adaptertrimtype: Paired-End
+    r1adapter: 
+    r1adaptertrim: FALSE
+    r2adapter: 
+    r2adaptertrim: FALSE
+
+SAMPLE INFORMATION:
+-----------------------------------
+Total samples: 6
+
+PhiX Control Samples:
+   1. Sample Name: PhiX
+      Index1: ATGTCGCTAG
+      Index2: CTAGCTCGTA
+      Lane: 1+2
+
+   2. Sample Name: PhiX
+      Index1: CACAGATCGT
+      Index2: ACGAGAGTCT
+      Lane: 1+2
+
+   3. Sample Name: PhiX
+      Index1: GCACATAGTC
+      Index2: GACTACTAGC
+      Lane: 1+2
+
+   4. Sample Name: PhiX
+      Index1: TGTGTCGACA
+      Index2: TGTCTGACAG
+      Lane: 1+2
+
+Regular Samples:
+   1. Sample Name: ExampleSample_1
+      Index1: AAAAAAAAAA
+      Index2: GGGGGGGGGG
+      Lane: 1+2
+
+   2. Sample Name: ExampleSample_2
+      Index1: TTTTTTTTTT
+      Index2: CCCCCCCCCC
+      Lane: 1+2
+
+SUMMARY STATISTICS:
+-----------------------------------
+Lanes used: 1, 2
+PhiX control samples: 4
+Regular samples: 2
+Dual-indexed samples: 6
+Samples with composite Index1: 0
+Samples with composite Index2: 0

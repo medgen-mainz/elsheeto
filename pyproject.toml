@@ -36,7 +36,7 @@ path = "elsheeto/version.py"
 dev = [
     "black==25.9.0",
     "coverage>=7.10.7",
-    "docutils>=0.22.0",
+    "docutils>=0.18.1,<0.22",
     "flake8>=3.6.0",
     "hatch~=1.14.2",
     "pyright",
@@ -45,6 +45,9 @@ dev = [
     "pytest-cov>=2.4.0",
     "pytest-sugar>=0.8.0",
     "pytest>=3.0.6",
+    "sphinx>=7.0.0",
+    "sphinx-rtd-theme>=2.0.0",
+    "sphinx-autodoc-typehints>=1.20.0",
     "syrupy>=5.0.0",
 ]
 
@@ -56,23 +59,23 @@ feature = [
 
 [tool.hatch.envs.quality.scripts]
 check = [
-  "black --check --diff --preview src tests",
-  "ruff check src tests",
+  "black --check --diff --preview src tests examples",
+  "ruff check src tests examples",
 ]
 format = [
-  "black src tests",
-  "ruff check --fix --unsafe-fixes src tests",
+  "black src tests examples",
+  "ruff check --fix --unsafe-fixes src tests examples",
   "check",
 ]
 typecheck = [
   """
   pyright --pythonpath="$(uv run --active hatch run quality:python -c 'import sys; print(sys.executable)')" \
-    {args:src/ tests/}
+    {args:src/ tests/ examples/}
   """
 ]
 
 [tool.pyright]
-include = ["src/elsheeto"]
+include = ["src/elsheeto", "examples"]
 exclude = [
     "**/node_modules",
     "**/__pycache__",
@@ -136,6 +139,7 @@ feature = [
 [tool.hatch.envs.docs.scripts]
 build = "sphinx-build -b html docs docs/_build/html"
 clean = "rm -rf docs/_build"
+serve = "python -m http.server 8000 --directory docs/_build/html"
 
 [tool.hatch.envs.build]
 installer = "uv"

@@ -1,0 +1,48 @@
+Reading Illumina v1 sample sheet: examples/illumina_v1_example1.csv
+============================================================
+HEADER INFORMATION:
+------------------------------
+Date: 11.11.2011
+Experiment Name: MyExperimentName
+Description: The Description
+Workflow: GenerateFASTQ
+Application: NextSeq FASTQ Only
+Instrument Type: NovaSeq/MiSeq
+Assay: TruSeq DNA Exome Enrichment
+
+SAMPLE INFORMATION:
+------------------------------
+Total samples: 4
+
+Sample Details:
+   1. Sample ID: L11-00001_01
+      Sample Name: (No name)
+      Description: NGS_Seq1_20111111_01
+      Index: ATCACTCACA
+      Index2: TTACGGTAAC
+
+   2. Sample ID: L11-00002_01
+      Sample Name: (No name)
+      Description: NGS_Seq1_20111111_01
+      Index: CGGAGGTAGA
+      Index2: TTCAGATGGA
+
+   3. Sample ID: L11-00003_01
+      Sample Name: (No name)
+      Description: NGS_Seq1_20111111_01
+      Index: GAGTTGACAA
+      Index2: TAGCATCTGT
+
+   4. Sample ID: L11-00004_01
+      Sample Name: (No name)
+      Description: NGS_Seq1_20111111_01
+      Index: GCCGAACTTG
+      Index2: GGACGAGATC
+
+INDEX SUMMARY:
+------------------------------
+Samples with index: 4
+Samples with dual indexing: 4
+Index adapters used:
+  I7 Index IDs: AD81, AD82, AD83, AD84
+  I5 Index IDs: AD81, AD82, AD83, AD84

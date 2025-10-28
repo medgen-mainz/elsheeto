@@ -1,6 +1,6 @@
 """Convenience facade functions for parsing sample sheets."""
 
-from anyio import Path
+from pathlib import Path
 
 from elsheeto.models.aviti import AvitiSheet
 from elsheeto.models.illumina_v1 import IlluminaSampleSheet
