@@ -63,9 +63,9 @@ class TestParser:
 
         # Check header section
         header = result.header_sections[0]
-        assert header.key_values["iemfileversion"] == "5"
-        assert header.key_values["experiment name"] == "MyExperiment"
-        assert header.key_values["date"] == "2023-01-01"
+        assert header.key_values["IEMFileVersion"] == "5"
+        assert header.key_values["Experiment Name"] == "MyExperiment"
+        assert header.key_values["Date"] == "2023-01-01"
 
         # Check data section
         data = result.data_section
@@ -166,8 +166,8 @@ class TestParser:
         result = parser.parse(raw_sheet=raw_sheet)
 
         assert len(result.header_sections) == 2
-        assert result.header_sections[0].key_values["iemfileversion"] == "5"
-        assert result.header_sections[1].key_values["setting1"] == "Value1"
+        assert result.header_sections[0].key_values["IEMFileVersion"] == "5"
+        assert result.header_sections[1].key_values["Setting1"] == "Value1"
 
     def test_parse_empty_sections(self):
         """Test parsing with empty sections."""
@@ -240,7 +240,7 @@ class TestParser:
         parser = Parser(config)
         result = parser.parse(raw_sheet=raw_sheet)
 
-        assert "key1" in result.header_sections[0].key_values
+        assert "KEY1" in result.header_sections[0].key_values
         assert result.data_section.headers == ["col1", "col2"]
 
         # Case sensitive
@@ -274,14 +274,12 @@ class TestParser:
 
         assert len(result.header_sections) == 1
         header = result.header_sections[0]
-        # Check that we have two rows with key-only values (reads format)
+        # Check that we have two rows with single values (reads format)
         assert len(header.rows) == 2
-        assert header.rows[0].key == "150"
-        assert header.rows[0].value == ""
-        assert header.rows[0].is_key_only
-        assert header.rows[1].key == "150"
-        assert header.rows[1].value == ""
-        assert header.rows[1].is_key_only
+        assert header.rows[0] == ["150"]
+        assert header.rows[1] == ["150"]
+        # These rows won't be available in key_values since they're not 2-element pairs
+        assert len(header.key_values) == 0
 
     def test_is_data_section(self):
         """Test data section identification."""
@@ -361,8 +359,8 @@ class TestParser:
         )
         result = parser._convert_to_header_section(section)
         assert result is not None
-        assert result.key_values["key1"] == "Value1"
-        assert result.key_values["key2"] == "Value2"
+        assert result.key_values["Key1"] == "Value1"
+        assert result.key_values["Key2"] == "Value2"
 
         # Empty section
         empty_section = ParsedRawSection(name="empty", num_columns=0, data=[])
@@ -426,8 +424,8 @@ class TestParser:
         # Should use the last data section (samples)
         assert result.data_section.headers == ["sample", "index"]
 
-    def test_header_row_too_many_non_empty_fields(self):
-        """Test validation error when header row has more than 2 non-empty fields."""
+    def test_header_row_flexible_fields(self):
+        """Test that header rows with any number of fields are now accepted."""
         raw_sheet = ParsedRawSheet(
             delimiter=",",
             sheet_type=ParsedSheetType.SECTIONED,
@@ -436,7 +434,7 @@ class TestParser:
                     name="header",
                     num_columns=4,
                     data=[
-                        ["Key1", "Value1", "ExtraField1", "ExtraField2"],  # Too many non-empty fields
+                        ["Key1", "Value1", "ExtraField1", "ExtraField2"],  # Now should work fine
                     ],
                 ),
             ],
@@ -444,9 +442,16 @@ class TestParser:
 
         config = ParserConfiguration()
         parser = Parser(config)
+        result = parser.parse(raw_sheet=raw_sheet)
 
-        with pytest.raises(ValueError, match="Header row contains more than 2 non-empty fields"):
-            parser.parse(raw_sheet=raw_sheet)
+        # Should not raise error and create header section
+        assert len(result.header_sections) == 1
+        header = result.header_sections[0]
+        # This row has more than 2 fields, so it won't appear in key_values
+        assert len(header.key_values) == 0
+        # But the raw row should be preserved
+        assert len(header.rows) == 1
+        assert header.rows[0] == ["Key1", "Value1", "ExtraField1", "ExtraField2"]
 
 
 class TestParseFunction:

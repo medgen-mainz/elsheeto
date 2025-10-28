@@ -10,6 +10,10 @@ Application: NextSeq FASTQ Only
 Instrument Type: NovaSeq/MiSeq
 Assay: TruSeq DNA Exome Enrichment
 
+READS INFORMATION:
+------------------------------
+Read lengths: [149, 149]
+
 SAMPLE INFORMATION:
 ------------------------------
 Total samples: 4

@@ -3,7 +3,13 @@
 import pytest
 from pydantic import ValidationError
 
-from elsheeto.models.aviti import AvitiRunValues, AvitiSample, AvitiSettings, AvitiSheet
+from elsheeto.models.aviti import (
+    AvitiRunValues,
+    AvitiSample,
+    AvitiSettingEntry,
+    AvitiSettings,
+    AvitiSheet,
+)
 
 
 class TestAvitiSample:
@@ -148,12 +154,54 @@ class TestAvitiSettings:
 
     def test_settings_with_data(self):
         """Test creating settings with data."""
+
         settings = AvitiSettings(
-            data={"R1Adapter": "ATGC", "R2Adapter": "CGTA"},
+            settings=[
+                AvitiSettingEntry(name="R1Adapter", value="ATGC"),
+                AvitiSettingEntry(name="R2Adapter", value="CGTA"),
+            ],
             extra_metadata={"Extra": "Data"},
         )
         assert settings.data == {"R1Adapter": "ATGC", "R2Adapter": "CGTA"}
         assert settings.extra_metadata == {"Extra": "Data"}
+
+    def test_settings_lane_specific(self):
+        """Test lane-specific settings functionality."""
+        settings = AvitiSettings(
+            settings=[
+                AvitiSettingEntry(name="SpikeInAsUnassigned", value="FALSE"),  # No lane
+                AvitiSettingEntry(name="R1FastQMask", value="R1:Y*N", lane="1+2"),
+                AvitiSettingEntry(name="R2FastQMask", value="R2:Y*N", lane="1+2"),
+                AvitiSettingEntry(name="I1Fastq", value="FALSE", lane="1"),
+                AvitiSettingEntry(name="I2Fastq", value="FALSE", lane="2"),
+            ],
+        )
+
+        # Test backward compatibility
+        expected_data = {
+            "SpikeInAsUnassigned": "FALSE",
+            "R1FastQMask": "R1:Y*N",
+            "R2FastQMask": "R2:Y*N",
+            "I1Fastq": "FALSE",  # First occurrence wins
+            "I2Fastq": "FALSE",
+        }
+        assert settings.data == expected_data
+
+        # Test lane-specific functionality
+        assert settings.get_all_lanes() == {"1+2", "1", "2"}
+
+        # Test settings by lane
+        no_lane_settings = settings.get_settings_by_lane(None)
+        assert no_lane_settings == {"SpikeInAsUnassigned": "FALSE"}
+
+        lane_12_settings = settings.get_settings_by_lane("1+2")
+        assert lane_12_settings == {"R1FastQMask": "R1:Y*N", "R2FastQMask": "R2:Y*N"}
+
+        lane_1_settings = settings.get_settings_by_lane("1")
+        assert lane_1_settings == {"I1Fastq": "FALSE"}
+
+        lane_2_settings = settings.get_settings_by_lane("2")
+        assert lane_2_settings == {"I2Fastq": "FALSE"}
 
 
 class TestAvitiSheet:
@@ -173,7 +221,7 @@ class TestAvitiSheet:
         """Test creating complete Aviti sheet."""
         sample = AvitiSample(sample_name="Sample1", index1="ATGC", index2="TCGA")
         run_values = AvitiRunValues(data={"RunId": "Run123"})
-        settings = AvitiSettings(data={"R1Adapter": "ATGC"})
+        settings = AvitiSettings(settings=[AvitiSettingEntry(name="R1Adapter", value="ATGC")])
 
         sheet = AvitiSheet(
             run_values=run_values,

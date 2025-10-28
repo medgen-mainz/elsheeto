@@ -6,7 +6,6 @@ from elsheeto.models.aviti import AvitiSheet
 from elsheeto.models.common import ParsedSheetType
 from elsheeto.models.csv_stage2 import (
     DataSection,
-    HeaderRow,
     HeaderSection,
     ParsedSheet,
 )
@@ -60,9 +59,9 @@ class TestParseRunValues:
         run_values_section = HeaderSection(
             name="runvalues",
             rows=[
-                HeaderRow(key="KeyName", value="SomeKey"),
-                HeaderRow(key="RunId", value="Run123"),
-                HeaderRow(key="Experiment", value="Test_Experiment"),
+                ["KeyName", "SomeKey"],
+                ["RunId", "Run123"],
+                ["Experiment", "Test_Experiment"],
             ],
         )
 
@@ -82,7 +81,7 @@ class TestParseRunValues:
         config = ParserConfiguration()
         parser = Parser(config)
 
-        header_section = HeaderSection(name="header", rows=[HeaderRow(key="SomeOtherKey", value="SomeValue")])
+        header_section = HeaderSection(name="header", rows=[["SomeOtherKey", "SomeValue"]])
 
         parsed_sheet = _create_parsed_sheet(header_sections=[header_section])
 
@@ -102,8 +101,8 @@ class TestParseSettings:
         settings_section = HeaderSection(
             name="settings",
             rows=[
-                HeaderRow(key="R1Adapter", value="CGTGCTGGATTGGCTCACCAGACACCTTCCGACAT"),
-                HeaderRow(key="R2Adapter", value="AGTTGACAAGCGGTAGCCTGCACACCTTCCGACAT"),
+                ["R1Adapter", "CGTGCTGGATTGGCTCACCAGACACCTTCCGACAT"],
+                ["R2Adapter", "AGTTGACAAGCGGTAGCCTGCACACCTTCCGACAT"],
             ],
         )
 
@@ -117,6 +116,49 @@ class TestParseSettings:
             "R2Adapter": "AGTTGACAAGCGGTAGCCTGCACACCTTCCGACAT",
         }
 
+    def test_parse_settings_lane_specific(self):
+        """Test parsing lane-specific Settings section with 3-column structure."""
+        config = ParserConfiguration()
+        parser = Parser(config)
+
+        settings_section = HeaderSection(
+            name="settings",
+            rows=[
+                ["SettingName", "Value", "Lane"],  # Header row (should be skipped)
+                ["SpikeInAsUnassigned", "FALSE", ""],  # Setting without lane
+                ["R1FastQMask", "R1:Y*N", "1+2"],  # Lane-specific setting
+                ["R2FastQMask", "R2:Y*N", "1+2"],  # Lane-specific setting
+                ["I1Fastq", "FALSE", "1+2"],  # Lane-specific setting
+            ],
+        )
+
+        parsed_sheet = _create_parsed_sheet(header_sections=[settings_section])
+
+        settings = parser._parse_settings(parsed_sheet)
+
+        assert settings is not None
+        # Test backward compatibility
+        assert "SpikeInAsUnassigned" in settings.data
+        assert "R1FastQMask" in settings.data
+        assert settings.data["SpikeInAsUnassigned"] == "FALSE"
+        assert settings.data["R1FastQMask"] == "R1:Y*N"
+
+        # Test new lane-specific functionality
+        assert len(settings.settings) == 4  # Header row should be skipped
+        assert settings.get_all_lanes() == {"1+2"}
+
+        # Test lane-specific settings
+        lane_settings = settings.get_settings_by_lane("1+2")
+        assert len(lane_settings) == 3
+        assert lane_settings["R1FastQMask"] == "R1:Y*N"
+        assert lane_settings["R2FastQMask"] == "R2:Y*N"
+        assert lane_settings["I1Fastq"] == "FALSE"
+
+        # Test settings without lane
+        no_lane_settings = settings.get_settings_by_lane(None)
+        assert len(no_lane_settings) == 1
+        assert no_lane_settings["SpikeInAsUnassigned"] == "FALSE"
+
     def test_parse_settings_no_section(self):
         """Test parsing when no Settings section is present."""
         config = ParserConfiguration()
@@ -126,8 +168,8 @@ class TestParseSettings:
         header_section = HeaderSection(
             name="header",
             rows=[
-                HeaderRow(key="SampleName", value="Sample1"),
-                HeaderRow(key="Index1", value="ATGC"),
+                ["SampleName", "Sample1"],
+                ["Index1", "ATGC"],
             ],
         )
 
@@ -136,6 +178,23 @@ class TestParseSettings:
         settings = parser._parse_settings(parsed_sheet)
 
         assert settings is None
+
+    def test_parse_settings_too_many_columns_error(self):
+        """Test that settings with more than 3 columns raise an error."""
+        config = ParserConfiguration()
+        parser = Parser(config)
+
+        settings_section = HeaderSection(
+            name="settings",
+            rows=[
+                ["R1Adapter", "ATGCATGC", "1+2", "ExtraColumn"],  # Too many columns - actual setting data
+            ],
+        )
+
+        parsed_sheet = _create_parsed_sheet(header_sections=[settings_section])
+
+        with pytest.raises(ValueError, match="Invalid Aviti settings row: found 4 non-empty fields"):
+            parser._parse_settings(parsed_sheet)
 
 
 class TestParseSamples:
@@ -372,8 +431,8 @@ class TestParseComplete:
         settings_section = HeaderSection(
             name="settings",
             rows=[
-                HeaderRow(key="R1Adapter", value="CGTGCTGGATTGGCTCACCAGACACCTTCCGACAT"),
-                HeaderRow(key="R2Adapter", value="AGTTGACAAGCGGTAGCCTGCACACCTTCCGACAT"),
+                ["R1Adapter", "CGTGCTGGATTGGCTCACCAGACACCTTCCGACAT"],
+                ["R2Adapter", "AGTTGACAAGCGGTAGCCTGCACACCTTCCGACAT"],
             ],
         )
 

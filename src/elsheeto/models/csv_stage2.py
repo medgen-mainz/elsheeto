@@ -11,53 +11,29 @@ from pydantic import BaseModel, ConfigDict, Field
 from elsheeto.models.common import ParsedSheetType
 
 
-class HeaderRow(BaseModel):
-    """Representation of a single row in a header section.
-
-    Each row contains exactly a key and value (both strings).
-    Empty fields are represented as empty strings.
-    """
-
-    #: First column (key)
-    key: str
-    #: Second column (value)
-    value: str
-
-    model_config = ConfigDict(frozen=True)
-
-    @property
-    def is_key_value_pair(self) -> bool:
-        """Check if this row represents a non-empty key-value pair."""
-        return bool(self.key.strip()) and bool(self.value.strip())
-
-    @property
-    def is_key_only(self) -> bool:
-        """Check if this row has only a key (value is empty)."""
-        return bool(self.key.strip()) and not bool(self.value.strip())
-
-    @property
-    def is_empty(self) -> bool:
-        """Check if this row is completely empty."""
-        return not bool(self.key.strip()) and not bool(self.value.strip())
-
-
 class HeaderSection(BaseModel):
     """Representation of a header section in a stage 2 sample sheet."""
 
     #: Original section name (e.g., "header", "reads", "settings")
     name: str
-    #: List of header rows preserving original structure
-    rows: Annotated[list[HeaderRow], Field(default_factory=list)]
+    #: List of header rows as lists of strings preserving original structure
+    rows: Annotated[list[list[str]], Field(default_factory=list)]
 
     model_config = ConfigDict(frozen=True)
 
     @property
     def key_values(self) -> dict[str, str]:
-        """Get key-value pairs as a dictionary for backward compatibility."""
+        """Get key-value pairs as a dictionary for backward compatibility.
+
+        Only considers rows with exactly 2 non-empty values as key-value pairs.
+        """
         result = {}
         for row in self.rows:
-            if row.is_key_value_pair:
-                result[row.key] = row.value
+            # Filter out empty cells
+            non_empty_cells = [cell.strip() for cell in row if cell.strip()]
+            # Only treat rows with exactly 2 non-empty cells as key-value pairs
+            if len(non_empty_cells) == 2:
+                result[non_empty_cells[0]] = non_empty_cells[1]
         return result
 
 

@@ -1,28 +1,8 @@
 {
-  "data_section": {
-    "data": [
-      [
-        "Sample1",
-        "Test Sample 1",
-        "Project1"
-      ]
-    ],
-    "header_to_index": {
-      "sample_id": 0,
-      "sample_name": 1,
-      "sample_project": 2
-    },
-    "headers": [
-      "sample_id",
-      "sample_name",
-      "sample_project"
-    ]
-  },
   "delimiter": ",",
-  "header_sections": [
+  "sections": [
     {
-      "name": "header",
-      "rows": [
+      "data": [
         [
           "IEMFileVersion",
           "4",
@@ -47,11 +27,12 @@
           "",
           ""
         ]
-      ]
+      ],
+      "name": "header",
+      "num_columns": 4
     },
     {
-      "name": "reads",
-      "rows": [
+      "data": [
         [
           "151",
           "",
@@ -62,7 +43,25 @@
           "",
           ""
         ]
-      ]
+      ],
+      "name": "reads",
+      "num_columns": 3
+    },
+    {
+      "data": [
+        [
+          "Sample_ID",
+          "Sample_Name",
+          "Sample_Project"
+        ],
+        [
+          "Sample1",
+          "Test Sample 1",
+          "Project1"
+        ]
+      ],
+      "name": "data",
+      "num_columns": 3
     }
   ],
   "sheet_type": "sectioned"

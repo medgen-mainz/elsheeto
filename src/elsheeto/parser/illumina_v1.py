@@ -116,8 +116,11 @@ class Parser:
 
         # Extract key-value pairs from header section
         for row in header_section.rows:
-            if row.is_key_value_pair and row.key and row.value:
-                header_data[row.key] = row.value
+            # Filter out empty cells
+            non_empty_cells = [cell.strip() for cell in row if cell.strip()]
+            # Only treat rows with exactly 2 non-empty cells as key-value pairs
+            if len(non_empty_cells) == 2:
+                header_data[non_empty_cells[0]] = non_empty_cells[1]
 
         # Map known fields with case-insensitive matching
         field_mapping = {
@@ -171,17 +174,23 @@ class Parser:
         read_lengths = []
         for row in reads_section.rows:
             try:
-                if row.is_key_only:
+                # Filter out empty cells
+                non_empty_cells = [cell.strip() for cell in row if cell.strip()]
+
+                if len(non_empty_cells) == 1:
                     # Handle format like "151" (single read length value)
-                    length = int(row.key.strip())
+                    length = int(non_empty_cells[0])
                     if 1 <= length <= 1000:  # Reasonable read length range (including UMI)
                         read_lengths.append(length)
-                elif not row.is_empty:
+                elif len(non_empty_cells) > 1:
                     # Invalid row in reads section - reads should only contain single values
-                    LOGGER.warning("Invalid row in reads section: key='%s', value='%s'", row.key, row.value)
+                    LOGGER.warning(
+                        "Invalid row in reads section: found %d values: %s", len(non_empty_cells), non_empty_cells
+                    )
                     return None
+                # Empty rows (len(non_empty_cells) == 0) are ignored
             except (ValueError, AttributeError):
-                LOGGER.warning("Could not parse read length from row: key='%s', value='%s'", row.key, row.value)
+                LOGGER.warning("Could not parse read length from row: %s", row)
                 return None
 
         if read_lengths:

@@ -8,7 +8,13 @@ import logging
 
 from pydantic import ValidationError
 
-from elsheeto.models.aviti import AvitiRunValues, AvitiSample, AvitiSettings, AvitiSheet
+from elsheeto.models.aviti import (
+    AvitiRunValues,
+    AvitiSample,
+    AvitiSettingEntry,
+    AvitiSettings,
+    AvitiSheet,
+)
 from elsheeto.models.csv_stage2 import ParsedSheet
 from elsheeto.parser.common import ParserConfiguration
 
@@ -92,10 +98,50 @@ class Parser:
         Returns:
             Parsed AvitiSettings or None if no Settings section found.
         """
+
         # Find the "settings" section by name (case-insensitive)
         for section in parsed_sheet.header_sections:
             if section.name.lower() == "settings":
-                return AvitiSettings(data=section.key_values, extra_metadata={})
+                settings = []
+                extra_metadata = {}
+
+                for row_idx, row in enumerate(section.rows):
+                    # Filter out empty cells
+                    non_empty_cells = [cell.strip() for cell in row if cell.strip()]
+
+                    # Skip header rows (detect by checking if first few cells look like column names)
+                    if (
+                        row_idx == 0
+                        and len(non_empty_cells) >= 2
+                        and any(
+                            header_name.lower() in non_empty_cells[0].lower()
+                            for header_name in ["settingname", "setting", "name", "key"]
+                        )
+                        and any(header_name.lower() in non_empty_cells[1].lower() for header_name in ["value", "val"])
+                    ):
+                        LOGGER.debug("Skipping header row in settings section: %s", non_empty_cells)
+                        continue
+
+                    if len(non_empty_cells) == 2:
+                        # Simple key-value pair
+                        settings.append(AvitiSettingEntry(name=non_empty_cells[0], value=non_empty_cells[1], lane=None))
+                    elif len(non_empty_cells) == 3:
+                        # Lane-specific setting: SettingName, Value, Lane
+                        settings.append(
+                            AvitiSettingEntry(
+                                name=non_empty_cells[0], value=non_empty_cells[1], lane=non_empty_cells[2]
+                            )
+                        )
+                    elif len(non_empty_cells) > 3:  # pragma: no cover
+                        # Error: Aviti settings should not have more than 3 columns
+                        raise ValueError(
+                            f"Invalid Aviti settings row: found {len(non_empty_cells)} non-empty fields, "
+                            f"expected 2 (SettingName, Value) or 3 (SettingName, Value, Lane). "
+                            f"Row content: {non_empty_cells}"
+                        )
+                    # Skip empty rows (len(non_empty_cells) == 0)
+
+                return AvitiSettings(settings=settings, extra_metadata=extra_metadata)
 
         return None
 

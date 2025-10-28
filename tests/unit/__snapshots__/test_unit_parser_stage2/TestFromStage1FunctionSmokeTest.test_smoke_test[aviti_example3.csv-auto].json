@@ -1,0 +1,29 @@
+{
+  "data_section": {
+    "data": [
+      [
+        "Sample1",
+        "AGGCAGAA",
+        "TGCTACGA"
+      ],
+      [
+        "Sample2",
+        "CGTTCTCTTG",
+        "CACCAAGTGG"
+      ]
+    ],
+    "header_to_index": {
+      "index1": 1,
+      "index2": 2,
+      "samplename": 0
+    },
+    "headers": [
+      "samplename",
+      "index1",
+      "index2"
+    ]
+  },
+  "delimiter": ",",
+  "header_sections": [],
+  "sheet_type": "sectioned"
+}

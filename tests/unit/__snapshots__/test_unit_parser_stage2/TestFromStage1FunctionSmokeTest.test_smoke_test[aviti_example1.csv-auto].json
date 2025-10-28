@@ -1,0 +1,44 @@
+{
+  "data_section": {
+    "data": [
+      [
+        "Sample_1",
+        "CCC",
+        "AAA",
+        "1",
+        "Library_Pool_1"
+      ],
+      [
+        "Sample_2",
+        "TTT",
+        "GGG",
+        "1",
+        "Library_Pool_1"
+      ],
+      [
+        "Sample_3",
+        "AAA",
+        "GGG",
+        "2",
+        "Library_Pool_2"
+      ]
+    ],
+    "header_to_index": {
+      "index1": 1,
+      "index2": 2,
+      "lane": 3,
+      "project": 4,
+      "samplename": 0
+    },
+    "headers": [
+      "samplename",
+      "index1",
+      "index2",
+      "lane",
+      "project"
+    ]
+  },
+  "delimiter": ",",
+  "header_sections": [],
+  "sheet_type": "sectioned"
+}
