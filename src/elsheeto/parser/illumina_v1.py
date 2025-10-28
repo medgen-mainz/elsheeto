@@ -88,9 +88,36 @@ class Parser:
         header_data = {}
         extra_metadata = {}
 
-        # Combine all header sections
+        # Find the "header" section by name
+        header_section = None
         for section in parsed_sheet.header_sections:
-            header_data.update(section.key_values)
+            if section.name == "header":
+                header_section = section
+                break
+
+        if not header_section:
+            # If no header section found, create minimal header
+            LOGGER.warning("No header section found, creating minimal header")
+            return IlluminaHeader(
+                iem_file_version=None,
+                investigator_name=None,
+                experiment_name=None,
+                date=None,
+                workflow="GenerateFASTQ",
+                application=None,
+                instrument_type=None,
+                assay=None,
+                index_adapters=None,
+                description=None,
+                chemistry=None,
+                run=None,
+                extra_metadata={},
+            )
+
+        # Extract key-value pairs from header section
+        for row in header_section.rows:
+            if row.is_key_value_pair and row.key and row.value:
+                header_data[row.key] = row.value
 
         # Map known fields with case-insensitive matching
         field_mapping = {
@@ -131,57 +158,36 @@ class Parser:
         Returns:
             Parsed IlluminaReads or None if no reads section found.
         """
-        # Look for reads section in header sections (single-value rows)
+        # Find the "reads" section by name
+        reads_section = None
         for section in parsed_sheet.header_sections:
-            # Check if this looks like a reads section based on values
-            if self._is_reads_section(section.key_values):
-                read_lengths = []
-                for _key, value in section.key_values.items():
-                    try:
-                        # Try to parse as integer (read length)
-                        length = int(value.strip())
-                        if length > 0:  # Valid read length
-                            read_lengths.append(length)
-                    except (ValueError, AttributeError):  # pragma: no cover
-                        # Skip non-numeric values
-                        continue
+            if section.name == "reads":
+                reads_section = section
+                break
 
-                if read_lengths:
-                    return IlluminaReads(read_lengths=read_lengths)
+        if not reads_section:
+            return None
+
+        read_lengths = []
+        for row in reads_section.rows:
+            try:
+                if row.is_key_only:
+                    # Handle format like "151" (single read length value)
+                    length = int(row.key.strip())
+                    if 1 <= length <= 1000:  # Reasonable read length range (including UMI)
+                        read_lengths.append(length)
+                elif not row.is_empty:
+                    # Invalid row in reads section - reads should only contain single values
+                    LOGGER.warning("Invalid row in reads section: key='%s', value='%s'", row.key, row.value)
+                    return None
+            except (ValueError, AttributeError):
+                LOGGER.warning("Could not parse read length from row: key='%s', value='%s'", row.key, row.value)
+                return None
+
+        if read_lengths:
+            return IlluminaReads(read_lengths=read_lengths)
 
         return None
-
-    def _is_reads_section(self, key_values: dict[str, str]) -> bool:
-        """Check if a section contains read length data.
-
-        Args:
-            key_values: The key-value pairs from the section.
-
-        Returns:
-            True if this appears to be a reads section.
-        """
-        # Check if most values are numeric (read lengths)
-        numeric_count = 0
-        total_count = len(key_values)
-
-        if total_count == 0:
-            return False
-
-        # Only consider sections with purely numeric keys and values as reads sections
-        for key, value in key_values.items():
-            try:
-                # Both key and value should be numeric for reads sections
-                key_num = int(key.strip())
-                value_num = int(value.strip())
-
-                # Reasonable read length range (typically 25-500bp)
-                if 25 <= key_num <= 500 and 25 <= value_num <= 500 and key_num == value_num:
-                    numeric_count += 1
-            except (ValueError, AttributeError):
-                continue
-
-        # If ALL values are valid read lengths, this is likely a reads section
-        return numeric_count > 0 and numeric_count == total_count
 
     def _parse_settings(self, parsed_sheet: ParsedSheet) -> IlluminaSettings | None:
         """Parse settings section from structured data.
@@ -192,29 +198,7 @@ class Parser:
         Returns:
             Parsed IlluminaSettings or None if no settings found.
         """
-        # Settings are typically key-value pairs that aren't reads or header data
-        settings_data = {}
-        extra_metadata = {}
-
-        for section in parsed_sheet.header_sections:
-            # Skip sections that look like reads
-            if self._is_reads_section(section.key_values):
-                continue
-
-            # For now, consider any remaining header sections as potential settings
-            # In practice, we might need more sophisticated logic
-            if len(section.key_values) > 0:
-                # This is a heuristic - you might want to refine this
-                contains_settings_keys = any(
-                    key.lower().startswith(("setting", "config", "param")) for key in section.key_values.keys()
-                )
-
-                if contains_settings_keys:
-                    settings_data.update(section.key_values)
-
-        if settings_data:
-            return IlluminaSettings(data=settings_data, extra_metadata=extra_metadata)
-
+        # Settings section is ignored per requirements
         return None
 
     def _parse_data(self, parsed_sheet: ParsedSheet) -> list[IlluminaSample]:

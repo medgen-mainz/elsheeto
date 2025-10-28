@@ -274,8 +274,14 @@ class TestParser:
 
         assert len(result.header_sections) == 1
         header = result.header_sections[0]
-        assert header.key_values["value_0"] == "150"
-        assert header.key_values["value_1"] == "150"
+        # Check that we have two rows with key-only values (reads format)
+        assert len(header.rows) == 2
+        assert header.rows[0].key == "150"
+        assert header.rows[0].value == ""
+        assert header.rows[0].is_key_only
+        assert header.rows[1].key == "150"
+        assert header.rows[1].value == ""
+        assert header.rows[1].is_key_only
 
     def test_is_data_section(self):
         """Test data section identification."""
@@ -419,6 +425,28 @@ class TestParser:
         assert "Multiple data sections found" in caplog.text
         # Should use the last data section (samples)
         assert result.data_section.headers == ["sample", "index"]
+
+    def test_header_row_too_many_non_empty_fields(self):
+        """Test validation error when header row has more than 2 non-empty fields."""
+        raw_sheet = ParsedRawSheet(
+            delimiter=",",
+            sheet_type=ParsedSheetType.SECTIONED,
+            sections=[
+                ParsedRawSection(
+                    name="header",
+                    num_columns=4,
+                    data=[
+                        ["Key1", "Value1", "ExtraField1", "ExtraField2"],  # Too many non-empty fields
+                    ],
+                ),
+            ],
+        )
+
+        config = ParserConfiguration()
+        parser = Parser(config)
+
+        with pytest.raises(ValueError, match="Header row contains more than 2 non-empty fields"):
+            parser.parse(raw_sheet=raw_sheet)
 
 
 class TestParseFunction:

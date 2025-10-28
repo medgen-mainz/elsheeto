@@ -1,0 +1,68 @@
+{
+  "delimiter": ",",
+  "sections": [
+    {
+      "data": [
+        [
+          "IEMFileVersion",
+          "4",
+          "",
+          ""
+        ],
+        [
+          "Experiment Name",
+          "Read Format Test 1",
+          "",
+          ""
+        ],
+        [
+          "Date",
+          "2025-10-28",
+          "",
+          ""
+        ],
+        [
+          "Workflow",
+          "GenerateFASTQ",
+          "",
+          ""
+        ]
+      ],
+      "name": "header",
+      "num_columns": 4
+    },
+    {
+      "data": [
+        [
+          "151",
+          "",
+          ""
+        ],
+        [
+          "151",
+          "",
+          ""
+        ]
+      ],
+      "name": "reads",
+      "num_columns": 3
+    },
+    {
+      "data": [
+        [
+          "Sample_ID",
+          "Sample_Name",
+          "Sample_Project"
+        ],
+        [
+          "Sample1",
+          "Test Sample 1",
+          "Project1"
+        ]
+      ],
+      "name": "data",
+      "num_columns": 3
+    }
+  ],
+  "sheet_type": "sectioned"
+}

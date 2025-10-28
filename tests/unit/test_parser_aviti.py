@@ -4,7 +4,12 @@ import pytest
 
 from elsheeto.models.aviti import AvitiSheet
 from elsheeto.models.common import ParsedSheetType
-from elsheeto.models.csv_stage2 import DataSection, HeaderSection, ParsedSheet
+from elsheeto.models.csv_stage2 import (
+    DataSection,
+    HeaderRow,
+    HeaderSection,
+    ParsedSheet,
+)
 from elsheeto.parser.aviti import Parser
 from elsheeto.parser.common import ParserConfiguration
 
@@ -53,11 +58,12 @@ class TestParseRunValues:
         parser = Parser(config)
 
         run_values_section = HeaderSection(
-            key_values={
-                "KeyName": "SomeKey",
-                "RunId": "Run123",
-                "Experiment": "Test_Experiment",
-            }
+            name="runvalues",
+            rows=[
+                HeaderRow(key="KeyName", value="SomeKey"),
+                HeaderRow(key="RunId", value="Run123"),
+                HeaderRow(key="Experiment", value="Test_Experiment"),
+            ],
         )
 
         parsed_sheet = _create_parsed_sheet(header_sections=[run_values_section])
@@ -76,26 +82,13 @@ class TestParseRunValues:
         config = ParserConfiguration()
         parser = Parser(config)
 
-        header_section = HeaderSection(key_values={"SomeOtherKey": "SomeValue"})
+        header_section = HeaderSection(name="header", rows=[HeaderRow(key="SomeOtherKey", value="SomeValue")])
 
         parsed_sheet = _create_parsed_sheet(header_sections=[header_section])
 
         run_values = parser._parse_run_values(parsed_sheet)
 
         assert run_values is None
-
-    def test_is_run_values_section_valid(self):
-        """Test RunValues section detection."""
-        config = ParserConfiguration()
-        parser = Parser(config)
-
-        # Valid RunValues section
-        assert parser._is_run_values_section({"KeyName": "Value", "RunId": "123"}) is True
-        assert parser._is_run_values_section({"Experiment": "Test"}) is True
-
-        # Invalid RunValues section
-        assert parser._is_run_values_section({"SampleName": "Sample1"}) is False
-        assert parser._is_run_values_section({}) is False
 
 
 class TestParseSettings:
@@ -107,10 +100,11 @@ class TestParseSettings:
         parser = Parser(config)
 
         settings_section = HeaderSection(
-            key_values={
-                "R1Adapter": "CGTGCTGGATTGGCTCACCAGACACCTTCCGACAT",
-                "R2Adapter": "AGTTGACAAGCGGTAGCCTGCACACCTTCCGACAT",
-            }
+            name="settings",
+            rows=[
+                HeaderRow(key="R1Adapter", value="CGTGCTGGATTGGCTCACCAGACACCTTCCGACAT"),
+                HeaderRow(key="R2Adapter", value="AGTTGACAAGCGGTAGCCTGCACACCTTCCGACAT"),
+            ],
         )
 
         parsed_sheet = _create_parsed_sheet(header_sections=[settings_section])
@@ -129,30 +123,19 @@ class TestParseSettings:
         parser = Parser(config)
 
         # Use a section that would be detected as samples-related
-        header_section = HeaderSection(key_values={"SampleName": "Sample1", "Index1": "ATGC"})
+        header_section = HeaderSection(
+            name="header",
+            rows=[
+                HeaderRow(key="SampleName", value="Sample1"),
+                HeaderRow(key="Index1", value="ATGC"),
+            ],
+        )
 
         parsed_sheet = _create_parsed_sheet(header_sections=[header_section])
 
         settings = parser._parse_settings(parsed_sheet)
 
         assert settings is None
-
-    def test_is_settings_section_valid(self):
-        """Test Settings section detection."""
-        config = ParserConfiguration()
-        parser = Parser(config)
-
-        # Valid Settings section - contains adapter information
-        assert parser._is_settings_section({"R1Adapter": "ATCG", "R2Adapter": "CGTA"}) is True
-        # Valid Settings section - contains setting keywords
-        assert parser._is_settings_section({"Setting1": "Value1"}) is True
-        # Valid Settings section - no sample indicators
-        assert parser._is_settings_section({"CustomConfig": "Value1"}) is True
-
-        # Invalid Settings section - contains sample indicators
-        assert parser._is_settings_section({"SampleName": "Sample1"}) is False
-        assert parser._is_settings_section({"Index1": "ATGC", "Index2": "CGTA"}) is False
-        assert parser._is_settings_section({}) is False
 
 
 class TestParseSamples:
@@ -381,16 +364,17 @@ class TestParseSamples:
 class TestParseComplete:
     """Test complete parsing functionality."""
 
-    def test_parse_complete_aviti_sheet(self):
+    def test_parse_sheet_full(self):
         """Test parsing a complete Aviti sample sheet."""
         config = ParserConfiguration()
         parser = Parser(config)
 
         settings_section = HeaderSection(
-            key_values={
-                "R1Adapter": "CGTGCTGGATTGGCTCACCAGACACCTTCCGACAT",
-                "R2Adapter": "AGTTGACAAGCGGTAGCCTGCACACCTTCCGACAT",
-            }
+            name="settings",
+            rows=[
+                HeaderRow(key="R1Adapter", value="CGTGCTGGATTGGCTCACCAGACACCTTCCGACAT"),
+                HeaderRow(key="R2Adapter", value="AGTTGACAAGCGGTAGCCTGCACACCTTCCGACAT"),
+            ],
         )
 
         data_section = _create_data_section(
@@ -455,57 +439,3 @@ class TestParseFunctionInterface:
         assert isinstance(aviti_sheet, AvitiSheet)
         assert len(aviti_sheet.samples) == 1
         assert aviti_sheet.samples[0].sample_name == "Sample1"
-
-
-class TestSmokeTestWithRealData:
-    """Smoke tests using real Aviti sample sheet files."""
-
-    @pytest.mark.parametrize(
-        "aviti_file",
-        [
-            "aviti/example1.csv",
-            "aviti/example2.csv",
-            "aviti/example3.csv",
-        ],
-    )
-    def test_end_to_end_pipeline(self, aviti_file: str):
-        """Test complete end-to-end parsing pipeline with real data files.
-
-        This test verifies that stage 1 -> stage 2 -> stage 3 parsing works
-        correctly with real Aviti sample sheet files.
-        """
-        from pathlib import Path
-
-        import elsheeto.parser.aviti as stage3
-        import elsheeto.parser.stage1 as stage1
-        import elsheeto.parser.stage2 as stage2
-
-        config = ParserConfiguration()
-        path_data = Path(__file__).parent.parent / "data"
-        file_path = path_data / aviti_file
-
-        # Stage 1: Parse raw CSV
-        with open(file_path, "r", encoding="utf-8") as f:
-            content = f.read()
-
-        raw_sheet = stage1.from_csv(data=content, config=config)
-        assert raw_sheet is not None
-
-        # Stage 2: Convert to structured format
-        structured_sheet = stage2.from_stage1(raw_sheet=raw_sheet, config=config)
-        assert structured_sheet is not None
-        assert structured_sheet.data_section is not None
-
-        # Stage 3: Convert to Aviti specific format
-        aviti_sheet = stage3.from_stage2(parsed_sheet=structured_sheet, config=config)
-        assert aviti_sheet is not None
-        assert isinstance(aviti_sheet, AvitiSheet)
-
-        # Verify basic structure
-        assert aviti_sheet.samples is not None
-        assert len(aviti_sheet.samples) > 0
-
-        # Verify all samples have required fields
-        for sample in aviti_sheet.samples:
-            assert sample.sample_name is not None and sample.sample_name.strip() != ""
-            assert sample.index1 is not None

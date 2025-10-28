@@ -1,0 +1,59 @@
+{
+  "data_section": {
+    "data": [
+      [
+        "Sample1",
+        "Test Sample 1",
+        "Project1"
+      ]
+    ],
+    "header_to_index": {
+      "sample_id": 0,
+      "sample_name": 1,
+      "sample_project": 2
+    },
+    "headers": [
+      "sample_id",
+      "sample_name",
+      "sample_project"
+    ]
+  },
+  "delimiter": ",",
+  "header_sections": [
+    {
+      "name": "header",
+      "rows": [
+        {
+          "key": "iemfileversion",
+          "value": "4"
+        },
+        {
+          "key": "experiment name",
+          "value": "Read Format Test 1"
+        },
+        {
+          "key": "date",
+          "value": "2025-10-28"
+        },
+        {
+          "key": "workflow",
+          "value": "GenerateFASTQ"
+        }
+      ]
+    },
+    {
+      "name": "reads",
+      "rows": [
+        {
+          "key": "151",
+          "value": ""
+        },
+        {
+          "key": "151",
+          "value": ""
+        }
+      ]
+    }
+  ],
+  "sheet_type": "sectioned"
+}

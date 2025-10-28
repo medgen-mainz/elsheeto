@@ -76,32 +76,12 @@ class Parser:
         Returns:
             Parsed AvitiRunValues or None if no RunValues section found.
         """
-        # Look for RunValues section in header sections
+        # Find the "runvalues" section by name (case-insensitive)
         for section in parsed_sheet.header_sections:
-            if self._is_run_values_section(section.key_values):
+            if section.name.lower() == "runvalues":
                 return AvitiRunValues(data=section.key_values, extra_metadata={})
 
         return None
-
-    def _is_run_values_section(self, key_values: dict[str, str]) -> bool:
-        """Check if a section contains RunValues data.
-
-        Args:
-            key_values: The key-value pairs from the section.
-
-        Returns:
-            True if this appears to be a RunValues section.
-        """
-        # RunValues sections typically contain configuration keys
-        # This is a heuristic - could be refined based on known RunValues keys
-        if not key_values:
-            return False
-
-        # Look for typical RunValues keys (this could be expanded)
-        run_values_indicators = {"keyname", "runid", "experiment", "date", "instrument", "flow", "cell"}
-
-        keys_lower = {key.lower() for key in key_values.keys()}
-        return bool(keys_lower.intersection(run_values_indicators))
 
     def _parse_settings(self, parsed_sheet: ParsedSheet) -> AvitiSettings | None:
         """Parse Settings section from structured data.
@@ -112,38 +92,12 @@ class Parser:
         Returns:
             Parsed AvitiSettings or None if no Settings section found.
         """
-        # Look for Settings section in header sections
+        # Find the "settings" section by name (case-insensitive)
         for section in parsed_sheet.header_sections:
-            if self._is_settings_section(section.key_values):
+            if section.name.lower() == "settings":
                 return AvitiSettings(data=section.key_values, extra_metadata={})
 
         return None
-
-    def _is_settings_section(self, key_values: dict[str, str]) -> bool:
-        """Check if a section contains Settings data.
-
-        Args:
-            key_values: The key-value pairs from the section.
-
-        Returns:
-            True if this appears to be a Settings section.
-        """
-        # Settings sections typically contain adapter sequences and other settings
-        if not key_values:
-            return False
-
-        # Look for typical Settings keys
-        settings_indicators = {"r1adapter", "r2adapter", "adapter", "setting", "config", "parameter"}
-
-        keys_lower = {key.lower() for key in key_values.keys()}
-
-        # If it contains typical settings indicators, it's definitely a settings section
-        if keys_lower.intersection(settings_indicators):
-            return True
-
-        # If it doesn't contain sample-specific indicators, it might be settings
-        sample_indicators = {"samplename", "index1", "index2", "lane", "project"}
-        return not bool(keys_lower.intersection(sample_indicators))
 
     def _parse_samples(self, parsed_sheet: ParsedSheet) -> list[AvitiSample]:
         """Parse samples section into AvitiSample objects.
