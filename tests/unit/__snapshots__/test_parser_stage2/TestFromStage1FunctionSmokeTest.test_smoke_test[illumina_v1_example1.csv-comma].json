@@ -84,23 +84,62 @@
   "delimiter": ",",
   "header_sections": [
     {
-      "key_values": {
-        "application": "NextSeq FASTQ Only",
-        "assay": "TruSeq DNA Exome Enrichment",
-        "chemistry": "Amplicon",
-        "date": "11.11.2011",
-        "description": "The Description",
-        "experiment name": "MyExperimentName",
-        "iemfileversion": "5",
-        "index adapters": "TruSeq DNA CD Indexes (96 Indexes)",
-        "instrument type": "NovaSeq/MiSeq",
-        "workflow": "GenerateFASTQ"
-      }
+      "name": "header",
+      "rows": [
+        {
+          "key": "iemfileversion",
+          "value": "5"
+        },
+        {
+          "key": "experiment name",
+          "value": "MyExperimentName"
+        },
+        {
+          "key": "date",
+          "value": "11.11.2011"
+        },
+        {
+          "key": "workflow",
+          "value": "GenerateFASTQ"
+        },
+        {
+          "key": "application",
+          "value": "NextSeq FASTQ Only"
+        },
+        {
+          "key": "instrument type",
+          "value": "NovaSeq/MiSeq"
+        },
+        {
+          "key": "assay",
+          "value": "TruSeq DNA Exome Enrichment"
+        },
+        {
+          "key": "index adapters",
+          "value": "TruSeq DNA CD Indexes (96 Indexes)"
+        },
+        {
+          "key": "description",
+          "value": "The Description"
+        },
+        {
+          "key": "chemistry",
+          "value": "Amplicon"
+        }
+      ]
     },
     {
-      "key_values": {
-        "149": ""
-      }
+      "name": "reads",
+      "rows": [
+        {
+          "key": "149",
+          "value": ""
+        },
+        {
+          "key": "149",
+          "value": ""
+        }
+      ]
     }
   ],
   "sheet_type": "sectioned"

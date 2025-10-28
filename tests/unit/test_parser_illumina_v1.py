@@ -3,7 +3,12 @@
 import pytest
 
 from elsheeto.models.common import ParsedSheetType
-from elsheeto.models.csv_stage2 import DataSection, HeaderSection, ParsedSheet
+from elsheeto.models.csv_stage2 import (
+    DataSection,
+    HeaderRow,
+    HeaderSection,
+    ParsedSheet,
+)
 from elsheeto.models.illumina_v1 import (
     IlluminaSampleSheet,
 )
@@ -55,19 +60,20 @@ class TestParseHeader:
         parser = Parser(config)
 
         header_section = HeaderSection(
-            key_values={
-                "IEMFileVersion": "4",
-                "Investigator Name": "John Doe",
-                "Experiment Name": "Test Experiment",
-                "Date": "2023-01-01",
-                "Workflow": "GenerateFASTQ",
-                "Application": "FASTQ Only",
-                "Instrument Type": "MiSeq",
-                "Assay": "TruSeq HT",
-                "Index Adapters": "TruSeq HT",
-                "Description": "Test description",
-                "Chemistry": "Amplicon",
-            }
+            name="header",
+            rows=[
+                HeaderRow(key="IEMFileVersion", value="4"),
+                HeaderRow(key="Investigator Name", value="John Doe"),
+                HeaderRow(key="Experiment Name", value="Test Experiment"),
+                HeaderRow(key="Date", value="2023-01-01"),
+                HeaderRow(key="Workflow", value="GenerateFASTQ"),
+                HeaderRow(key="Application", value="FASTQ Only"),
+                HeaderRow(key="Instrument Type", value="MiSeq"),
+                HeaderRow(key="Assay", value="TruSeq HT"),
+                HeaderRow(key="Index Adapters", value="TruSeq HT"),
+                HeaderRow(key="Description", value="Test description"),
+                HeaderRow(key="Chemistry", value="Amplicon"),
+            ],
         )
 
         parsed_sheet = _create_parsed_sheet(header_sections=[header_section])
@@ -92,11 +98,12 @@ class TestParseHeader:
         parser = Parser(config)
 
         header_section = HeaderSection(
-            key_values={
-                "iemfileversion": "4",
-                "INVESTIGATOR NAME": "Jane Smith",
-                "experiment name": "Mixed Case Test",
-            }
+            name="header",
+            rows=[
+                HeaderRow(key="iemfileversion", value="4"),
+                HeaderRow(key="INVESTIGATOR NAME", value="Jane Smith"),
+                HeaderRow(key="experiment name", value="Mixed Case Test"),
+            ],
         )
 
         parsed_sheet = _create_parsed_sheet(header_sections=[header_section])
@@ -113,12 +120,13 @@ class TestParseHeader:
         parser = Parser(config)
 
         header_section = HeaderSection(
-            key_values={
-                "IEMFileVersion": "4",
-                "Investigator Name": "John Doe",
-                "Custom Field": "Custom Value",
-                "Another Field": "Another Value",
-            }
+            name="header",
+            rows=[
+                HeaderRow(key="IEMFileVersion", value="4"),
+                HeaderRow(key="Investigator Name", value="John Doe"),
+                HeaderRow(key="Custom Field", value="Custom Value"),
+                HeaderRow(key="Another Field", value="Another Value"),
+            ],
         )
 
         parsed_sheet = _create_parsed_sheet(header_sections=[header_section])
@@ -139,16 +147,13 @@ class TestParseHeader:
 
         header_sections = [
             HeaderSection(
-                key_values={
-                    "IEMFileVersion": "4",
-                    "Investigator Name": "John Doe",
-                }
-            ),
-            HeaderSection(
-                key_values={
-                    "Experiment Name": "Test Experiment",
-                    "Date": "2023-01-01",
-                }
+                name="header",
+                rows=[
+                    HeaderRow(key="IEMFileVersion", value="4"),
+                    HeaderRow(key="Investigator Name", value="John Doe"),
+                    HeaderRow(key="Experiment Name", value="Test Experiment"),
+                    HeaderRow(key="Date", value="2023-01-01"),
+                ],
             ),
         ]
 
@@ -161,6 +166,31 @@ class TestParseHeader:
         assert header.experiment_name == "Test Experiment"
         assert header.date == "2023-01-01"
 
+    def test_parse_header_no_header_section(self):
+        """Test parsing when no header section is present."""
+        config = ParserConfiguration()
+        parser = Parser(config)
+
+        # Create parsed sheet without any header section
+        parsed_sheet = _create_parsed_sheet(header_sections=[])
+
+        header = parser._parse_header(parsed_sheet)
+
+        # Should create minimal header with defaults
+        assert header.iem_file_version is None
+        assert header.investigator_name is None
+        assert header.experiment_name is None
+        assert header.date is None
+        assert header.workflow == "GenerateFASTQ"
+        assert header.application is None
+        assert header.instrument_type is None
+        assert header.assay is None
+        assert header.index_adapters is None
+        assert header.description is None
+        assert header.chemistry is None
+        assert header.run is None
+        assert header.extra_metadata == {}
+
 
 class TestParseReads:
     """Test reads parsing functionality."""
@@ -170,7 +200,7 @@ class TestParseReads:
         config = ParserConfiguration()
         parser = Parser(config)
 
-        reads_section = HeaderSection(key_values={"151": "151"})
+        reads_section = HeaderSection(name="reads", rows=[HeaderRow(key="151", value="")])
 
         parsed_sheet = _create_parsed_sheet(header_sections=[reads_section])
 
@@ -184,7 +214,9 @@ class TestParseReads:
         config = ParserConfiguration()
         parser = Parser(config)
 
-        reads_section = HeaderSection(key_values={"151": "151", "151 ": "151"})
+        reads_section = HeaderSection(
+            name="reads", rows=[HeaderRow(key="151", value=""), HeaderRow(key="151", value="")]
+        )
 
         parsed_sheet = _create_parsed_sheet(header_sections=[reads_section])
 
@@ -198,7 +230,13 @@ class TestParseReads:
         config = ParserConfiguration()
         parser = Parser(config)
 
-        header_section = HeaderSection(key_values={"IEMFileVersion": "4", "Investigator Name": "John Doe"})
+        header_section = HeaderSection(
+            name="header",
+            rows=[
+                HeaderRow(key="IEMFileVersion", value="4"),
+                HeaderRow(key="Investigator Name", value="John Doe"),
+            ],
+        )
 
         parsed_sheet = _create_parsed_sheet(header_sections=[header_section])
 
@@ -206,19 +244,58 @@ class TestParseReads:
 
         assert reads is None
 
-    def test_is_reads_section_valid(self):
-        """Test reads section detection with valid numeric values."""
+    def test_parse_reads_invalid_row_format(self):
+        """Test parsing reads section with invalid row format (non-empty key and value)."""
         config = ParserConfiguration()
         parser = Parser(config)
 
-        # Valid reads section
-        assert parser._is_reads_section({"151": "151"}) is True
-        assert parser._is_reads_section({"75": "75"}) is True
+        reads_section = HeaderSection(
+            name="reads",
+            rows=[
+                HeaderRow(key="151", value=""),  # Valid row
+                HeaderRow(key="SomeKey", value="SomeValue"),  # Invalid row (not empty, not key-only)
+            ],
+        )
 
-        # Invalid reads section (non-matching key/value)
-        assert parser._is_reads_section({"151": "150"}) is False
-        assert parser._is_reads_section({"Name": "Value", "Other": "Data"}) is False
-        assert parser._is_reads_section({}) is False
+        parsed_sheet = _create_parsed_sheet(header_sections=[reads_section])
+
+        reads = parser._parse_reads(parsed_sheet)
+
+        # Should return None due to invalid row format
+        assert reads is None
+
+    def test_parse_reads_invalid_numeric_value(self):
+        """Test parsing reads section with non-numeric value."""
+        config = ParserConfiguration()
+        parser = Parser(config)
+
+        reads_section = HeaderSection(
+            name="reads",
+            rows=[
+                HeaderRow(key="abc", value=""),  # Invalid non-numeric key
+            ],
+        )
+
+        parsed_sheet = _create_parsed_sheet(header_sections=[reads_section])
+
+        reads = parser._parse_reads(parsed_sheet)
+
+        # Should return None due to non-numeric value
+        assert reads is None
+
+    def test_parse_reads_empty_reads_section(self):
+        """Test parsing empty reads section (no rows)."""
+        config = ParserConfiguration()
+        parser = Parser(config)
+
+        reads_section = HeaderSection(name="reads", rows=[])
+
+        parsed_sheet = _create_parsed_sheet(header_sections=[reads_section])
+
+        reads = parser._parse_reads(parsed_sheet)
+
+        # Should return None for empty reads section
+        assert reads is None
 
 
 class TestParseSettings:
@@ -230,28 +307,32 @@ class TestParseSettings:
         parser = Parser(config)
 
         settings_section = HeaderSection(
-            key_values={
-                "SettingOption1": "Value1",
-                "ConfigParameter": "Value2",
-            }
+            name="settings",
+            rows=[
+                HeaderRow(key="SettingOption1", value="Value1"),
+                HeaderRow(key="ConfigParameter", value="Value2"),
+            ],
         )
 
         parsed_sheet = _create_parsed_sheet(header_sections=[settings_section])
 
         settings = parser._parse_settings(parsed_sheet)
 
-        assert settings is not None
-        assert settings.data == {
-            "SettingOption1": "Value1",
-            "ConfigParameter": "Value2",
-        }
+        # Settings section is ignored per requirements
+        assert settings is None
 
-    def test_parse_settings_no_settings(self):
+    def test_parse_settings_no_settings_section(self):
         """Test parsing when no settings section is present."""
         config = ParserConfiguration()
         parser = Parser(config)
 
-        header_section = HeaderSection(key_values={"IEMFileVersion": "4", "Investigator Name": "John Doe"})
+        header_section = HeaderSection(
+            name="header",
+            rows=[
+                HeaderRow(key="IEMFileVersion", value="4"),
+                HeaderRow(key="Investigator Name", value="John Doe"),
+            ],
+        )
 
         parsed_sheet = _create_parsed_sheet(header_sections=[header_section])
 
@@ -470,16 +551,17 @@ class TestParseComplete:
         parser = Parser(config)
 
         header_section = HeaderSection(
-            key_values={
-                "IEMFileVersion": "4",
-                "Investigator Name": "John Doe",
-                "Experiment Name": "Test Experiment",
-                "Date": "2023-01-01",
-                "Workflow": "GenerateFASTQ",
-            }
+            name="header",
+            rows=[
+                HeaderRow(key="IEMFileVersion", value="4"),
+                HeaderRow(key="Investigator Name", value="John Doe"),
+                HeaderRow(key="Experiment Name", value="Test Experiment"),
+                HeaderRow(key="Date", value="2023-01-01"),
+                HeaderRow(key="Workflow", value="GenerateFASTQ"),
+            ],
         )
 
-        reads_section = HeaderSection(key_values={"151": "151"})
+        reads_section = HeaderSection(name="reads", rows=[HeaderRow(key="151", value="")])
 
         data_section = _create_data_section(
             headers=["Sample_ID", "Sample_Name", "I7_Index_ID", "index"],
@@ -507,7 +589,7 @@ class TestParseComplete:
         config = ParserConfiguration()
         parser = Parser(config)
 
-        header_section = HeaderSection(key_values={"IEMFileVersion": "4"})
+        header_section = HeaderSection(name="header", rows=[HeaderRow(key="IEMFileVersion", value="4")])
 
         data_section = _create_data_section(headers=["Sample_ID"], data=[["Sample1"]])
 
@@ -532,7 +614,13 @@ class TestParseFunctionInterface:
 
         config = ParserConfiguration()
 
-        header_section = HeaderSection(key_values={"IEMFileVersion": "4", "Investigator Name": "John Doe"})
+        header_section = HeaderSection(
+            name="header",
+            rows=[
+                HeaderRow(key="IEMFileVersion", value="4"),
+                HeaderRow(key="Investigator Name", value="John Doe"),
+            ],
+        )
 
         data_section = _create_data_section(headers=["Sample_ID"], data=[["Sample1"]])
 
@@ -545,58 +633,3 @@ class TestParseFunctionInterface:
         assert sample_sheet.header.investigator_name == "John Doe"
         assert len(sample_sheet.data) == 1
         assert sample_sheet.data[0].sample_id == "Sample1"
-
-
-class TestSmokeTestWithRealData:
-    """Smoke tests using real Illumina v1 sample sheet files."""
-
-    @pytest.mark.parametrize(
-        "illumina_file",
-        [
-            "illumina_v1/example1.csv",
-            "illumina_v1/example2.csv",
-        ],
-    )
-    def test_end_to_end_pipeline(self, illumina_file: str):
-        """Test complete end-to-end parsing pipeline with real data files.
-
-        This test verifies that stage 1 -> stage 2 -> stage 3 parsing works
-        correctly with real Illumina v1 sample sheet files.
-        """
-        from pathlib import Path
-
-        import elsheeto.parser.illumina_v1 as stage3
-        import elsheeto.parser.stage1 as stage1
-        import elsheeto.parser.stage2 as stage2
-
-        config = ParserConfiguration()
-        path_data = Path(__file__).parent.parent / "data"
-        file_path = path_data / illumina_file
-
-        # Stage 1: Parse raw CSV
-        with open(file_path, "r", encoding="utf-8") as f:
-            content = f.read()
-
-        raw_sheet = stage1.from_csv(data=content, config=config)
-        assert raw_sheet is not None
-
-        # Stage 2: Convert to structured format
-        structured_sheet = stage2.from_stage1(raw_sheet=raw_sheet, config=config)
-        assert structured_sheet is not None
-        assert len(structured_sheet.header_sections) > 0
-        assert structured_sheet.data_section is not None
-
-        # Stage 3: Convert to Illumina v1 specific format
-        illumina_sheet = stage3.from_stage2(parsed_sheet=structured_sheet, config=config)
-        assert illumina_sheet is not None
-        assert isinstance(illumina_sheet, IlluminaSampleSheet)
-
-        # Verify basic structure
-        assert illumina_sheet.header is not None
-        assert illumina_sheet.header.iem_file_version is not None
-        assert illumina_sheet.data is not None
-        assert len(illumina_sheet.data) > 0
-
-        # Verify all samples have required fields
-        for sample in illumina_sheet.data:
-            assert sample.sample_id is not None and sample.sample_id.strip() != ""

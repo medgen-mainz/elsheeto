@@ -1,0 +1,11 @@
+[Header]
+IEMFileVersion,4
+Experiment Name,Read Format Test 2
+Date,2025-10-28
+Workflow,GenerateFASTQ
+[Reads]
+151
+151
+[Data]
+Sample_ID,Sample_Name,Sample_Project
+Sample1,Test Sample 1,Project1

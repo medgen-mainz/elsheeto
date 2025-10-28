@@ -167,7 +167,7 @@ class Parser:
         return True
 
     def _convert_to_header_section(self, section: ParsedRawSection) -> HeaderSection | None:
-        """Convert a raw section to a header section (key-value pairs).
+        """Convert a raw section to a header section (key-value pairs and standalone values).
 
         Args:
             section: The raw section to convert.
@@ -175,30 +175,34 @@ class Parser:
         Returns:
             HeaderSection object or None if section is empty.
         """
-        key_values = {}
+        from elsheeto.models.csv_stage2 import HeaderRow
+
+        rows = []
 
         for row in section.data:
             if not row or all(cell.strip() == "" for cell in row):
                 continue  # Skip empty rows
 
-            # Handle different key-value formats
-            if len(row) >= 2 and row[0].strip():
-                key = row[0].strip()
-                value = row[1].strip()
+            # Count non-empty cells
+            non_empty_cells = [cell.strip() for cell in row if cell.strip()]
 
-                # Apply case transformations if configured
-                if not self.config.key_case.is_case_sensitive():
-                    key = key.lower()
+            # Validation: fail if more than 2 non-empty fields
+            if len(non_empty_cells) > 2:
+                raise ValueError(f"Header row contains more than 2 non-empty fields: {non_empty_cells}")
 
-                key_values[key] = value
-            elif len(row) == 1 and row[0].strip():
-                # Single value rows (e.g., "150" in Reads section)
-                key = f"value_{len(key_values)}"
-                if not self.config.key_case.is_case_sensitive():
-                    key = key.lower()
-                key_values[key] = row[0].strip()
+            # Ensure we have at least 2 cells (pad with empty strings if needed)
+            padded_row = row + [""] * (2 - len(row))
 
-        return HeaderSection(key_values=key_values) if key_values else None
+            key = padded_row[0].strip()
+            value = padded_row[1].strip()
+
+            # Apply case transformations if configured
+            if not self.config.key_case.is_case_sensitive():
+                key = key.lower()
+
+            rows.append(HeaderRow(key=key, value=value))
+
+        return HeaderSection(name=section.name.lower(), rows=rows) if rows else None
 
     def _convert_to_data_section(self, section: ParsedRawSection) -> DataSection:
         """Convert a raw section to a data section (tabular data).
