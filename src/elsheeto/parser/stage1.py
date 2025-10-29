@@ -11,7 +11,9 @@ Here, we parse the sectioned CSV files.  This is done as follows.
 import csv
 import io
 import logging
+import warnings
 
+from elsheeto.exceptions import ColumnConsistencyWarning
 from elsheeto.models.common import ParsedSheetType
 from elsheeto.models.csv_stage1 import ParsedRawSection, ParsedRawSheet
 from elsheeto.parser.common import (
@@ -60,8 +62,8 @@ class Parser:
             else ParsedSheetType.SECTIONLESS
         )
 
-        # Apply column consistency checks
-        self._validate_column_consistency(sections)
+        # Apply column consistency checks and potentially pad data
+        sections = self._validate_column_consistency(sections)
 
         return ParsedRawSheet(delimiter=dialect.delimiter, sheet_type=sheet_type, sections=sections)
 
@@ -238,17 +240,22 @@ class Parser:
         num_columns = max(len(row) for row in data) if data else 0
         return ParsedRawSection(name=name, num_columns=num_columns, data=data)
 
-    def _validate_column_consistency(self, sections: list[ParsedRawSection]) -> None:
+    def _validate_column_consistency(self, sections: list[ParsedRawSection]) -> list[ParsedRawSection]:
         """Validate column consistency based on configuration.
 
+        For WARN_AND_PAD mode, pads rows with missing cells and issues warnings.
+
         Args:
-            sections: List of parsed sections to validate.
+            sections: List of parsed sections to validate and potentially modify.
+
+        Returns:
+            List of sections, potentially with modified data for WARN_AND_PAD mode.
 
         Raises:
-            ValueError: If column consistency requirements are not met.
+            ValueError: If column consistency requirements are not met (strict modes only).
         """
         if self.config.column_consistency == ColumnConsistency.LOOSE:
-            return
+            return sections
 
         if self.config.column_consistency == ColumnConsistency.STRICT_GLOBAL:
             # Check that all sections have the same number of columns
@@ -260,31 +267,140 @@ class Parser:
                             f"Global column consistency violated: section '{section.name}' "
                             f"has {section.num_columns} columns, expected {expected_columns}"
                         )
+            return sections
 
         elif self.config.column_consistency == ColumnConsistency.STRICT_SECTIONED:
             # Check that each section has consistent columns within itself
             for section in sections:
-                if section.data:
-                    # Find the first non-empty row to determine expected column count
-                    expected_columns = None
-                    for row in section.data:
-                        if row and any(cell.strip() for cell in row):  # Non-empty row
-                            expected_columns = len(row)
-                            break
+                self._validate_strict_sectioned_consistency(section)
+            return sections
 
-                    if expected_columns is None:  # pragma: no cover
-                        continue  # All rows are empty, no consistency to check
+        elif self.config.column_consistency == ColumnConsistency.PAD:
+            # Pad rows silently without warnings
+            return [self._pad_section(section) for section in sections]
 
-                    for i, row in enumerate(section.data):
-                        # Always skip truly empty rows in consistency check,
-                        # regardless of ignore_empty_lines setting
-                        if self._is_empty_row(row):
-                            continue
-                        if len(row) != expected_columns:
-                            raise ValueError(
-                                f"Section '{section.name}' column consistency violated: "
-                                f"row {i} has {len(row)} columns, expected {expected_columns}"
-                            )
+        elif self.config.column_consistency == ColumnConsistency.WARN_AND_PAD:
+            # Pad rows and issue warnings for inconsistent columns
+            return [self._warn_and_pad_section(section) for section in sections]
+
+        raise AssertionError("unreachable")  # pragma: no cover
+
+    def _validate_strict_sectioned_consistency(self, section: ParsedRawSection) -> None:
+        """Validate strict sectioned consistency for a single section.
+
+        Args:
+            section: The section to validate.
+
+        Raises:
+            ValueError: If column consistency requirements are not met.
+        """
+        if section.data:
+            # Find the first non-empty row to determine expected column count
+            expected_columns = None
+            for row in section.data:
+                if row and any(cell.strip() for cell in row):  # Non-empty row
+                    expected_columns = len(row)
+                    break
+
+            if expected_columns is None:  # pragma: no cover
+                return  # All rows are empty, no consistency to check
+
+            for i, row in enumerate(section.data):
+                # Always skip truly empty rows in consistency check,
+                # regardless of ignore_empty_lines setting
+                if self._is_empty_row(row):
+                    continue
+                if len(row) != expected_columns:
+                    raise ValueError(
+                        f"Section '{section.name}' column consistency violated: "
+                        f"row {i} has {len(row)} columns, expected {expected_columns}"
+                    )
+
+    def _pad_section(self, section: ParsedRawSection) -> ParsedRawSection:
+        """Pad rows to consistent length silently without warnings.
+
+        Args:
+            section: The section to process and potentially modify.
+
+        Returns:
+            A new ParsedRawSection with padded data.
+        """
+        if not section.data:
+            return section
+
+        # Find the maximum column count in the section
+        max_columns = 0
+        for row in section.data:
+            if not self._is_empty_row(row):
+                max_columns = max(max_columns, len(row))
+
+        if max_columns == 0:
+            return section  # All rows are empty
+
+        # Create new data with padded rows
+        new_data = []
+
+        for _i, row in enumerate(section.data):
+            if self._is_empty_row(row):
+                new_data.append(row)  # Keep empty rows as-is
+                continue
+
+            if len(row) < max_columns:
+                # Pad the row with empty strings (no warning)
+                new_data.append(row + [""] * (max_columns - len(row)))
+            else:
+                new_data.append(row)
+
+        # Return new section with padded data and updated column count
+        return ParsedRawSection(name=section.name, num_columns=max_columns, data=new_data)
+
+    def _warn_and_pad_section(self, section: ParsedRawSection) -> ParsedRawSection:
+        """Pad rows to consistent length and issue warnings for inconsistencies.
+
+        Args:
+            section: The section to process and potentially modify.
+
+        Returns:
+            A new ParsedRawSection with padded data.
+        """
+        if not section.data:
+            return section
+
+        # Find the maximum column count in the section
+        max_columns = 0
+        for row in section.data:
+            if not self._is_empty_row(row):
+                max_columns = max(max_columns, len(row))
+
+        if max_columns == 0:
+            return section  # All rows are empty
+
+        # Create new data with padded rows
+        new_data = []
+        warnings_issued = False
+
+        for _i, row in enumerate(section.data):
+            if self._is_empty_row(row):
+                new_data.append(row)  # Keep empty rows as-is
+                continue
+
+            if len(row) < max_columns:
+                # Issue warning for missing columns
+                if not warnings_issued:  # Only warn once per section to avoid spam
+                    warnings.warn(
+                        f"Section '{section.name}': padding missing cells with empty strings "
+                        f"(some rows have fewer than {max_columns} columns)",
+                        ColumnConsistencyWarning,
+                        stacklevel=4,
+                    )
+                    warnings_issued = True
+                # Pad the row with empty strings
+                new_data.append(row + [""] * (max_columns - len(row)))
+            else:
+                new_data.append(row)
+
+        # Return new section with padded data and updated column count
+        return ParsedRawSection(name=section.name, num_columns=max_columns, data=new_data)
 
 
 def from_csv(*, data: str, config: ParserConfiguration) -> ParsedRawSheet:

@@ -39,6 +39,10 @@ class ColumnConsistency(str, Enum):
     STRICT_GLOBAL = "strict_global"
     #: Loose mode allowing variable columns.
     LOOSE = "loose"
+    #: Pad missing cells silently without warnings.
+    PAD = "pad"
+    #: Warning mode - pad missing cells and issue warnings.
+    WARN_AND_PAD = "warn_and_pad"
 
 
 class ParserConfiguration(BaseModel):
@@ -57,7 +61,7 @@ class ParserConfiguration(BaseModel):
     #: Line prefixes to recognize as comments.
     comment_prefixes: list[str] = ["#"]
     #: Column consistency configuration.
-    column_consistency: ColumnConsistency = ColumnConsistency.STRICT_SECTIONED
+    column_consistency: ColumnConsistency = ColumnConsistency.WARN_AND_PAD
 
     model_config = ConfigDict(
         frozen=True,
