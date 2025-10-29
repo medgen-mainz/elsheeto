@@ -5,6 +5,8 @@ The Stage 2 results are converted into these models in Stage 3.
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from elsheeto.models.utils import CaseInsensitiveDict
+
 
 class AvitiSample(BaseModel):
     """Representation of a single Aviti sample."""
@@ -25,7 +27,7 @@ class AvitiSample(BaseModel):
     description: str | None = None
 
     #: Optional extra metadata for unknown fields.
-    extra_metadata: dict[str, str] = Field(default_factory=dict)
+    extra_metadata: CaseInsensitiveDict = Field(default_factory=lambda: CaseInsensitiveDict({}))
 
     #: Model configuration.
     model_config = ConfigDict(frozen=True)
@@ -94,9 +96,9 @@ class AvitiRunValues(BaseModel):
     """Representation of the `RunValues` section of an Aviti sample sheet."""
 
     #: Key-value pairs from the RunValues section.
-    data: dict[str, str] = Field(default_factory=dict)
+    data: CaseInsensitiveDict = Field(default_factory=lambda: CaseInsensitiveDict({}))
     #: Optional extra metadata.
-    extra_metadata: dict[str, str] = Field(default_factory=dict)
+    extra_metadata: CaseInsensitiveDict = Field(default_factory=lambda: CaseInsensitiveDict({}))
 
     model_config = ConfigDict(frozen=True)
 
@@ -131,7 +133,7 @@ class AvitiSettingEntries(BaseModel):
         Returns:
             List of all setting entries with the specified key.
         """
-        return [entry for entry in self.entries if entry.name == key]
+        return [entry for entry in self.entries if entry.name.lower() == key.lower()]
 
     def get_by_key(self, key: str) -> AvitiSettingEntry:
         """Get exactly one setting entry with the specified key.
@@ -165,7 +167,7 @@ class AvitiSettingEntries(BaseModel):
         Raises:
             ValueError: If zero or more than one entry found with the key and lane combination.
         """
-        matches = [entry for entry in self.entries if entry.name == key and entry.lane == lane]
+        matches = [entry for entry in self.entries if entry.name.lower() == key.lower() and entry.lane == lane]
         if len(matches) == 0:
             lane_str = "None" if lane is None else f"'{lane}'"
             raise ValueError(f"No setting found with key: {key} and lane: {lane_str}")
@@ -184,23 +186,23 @@ class AvitiSettings(BaseModel):
     #: Collection of setting entries (may include lane-specific settings).
     settings: AvitiSettingEntries = Field(default_factory=AvitiSettingEntries)
     #: Optional extra metadata.
-    extra_metadata: dict[str, str] = Field(default_factory=dict)
+    extra_metadata: CaseInsensitiveDict = Field(default_factory=lambda: CaseInsensitiveDict({}))
 
     model_config = ConfigDict(frozen=True)
 
     @property
-    def data(self) -> dict[str, str]:
+    def data(self) -> CaseInsensitiveDict:
         """Get simple key-value pairs for backward compatibility.
 
         For lane-specific settings, only returns the first occurrence of each setting name.
         """
-        result = {}
+        result = CaseInsensitiveDict({})
         for setting in self.settings.entries:
             if setting.name not in result:
                 result[setting.name] = setting.value
         return result
 
-    def get_settings_by_lane(self, lane: str | None = None) -> dict[str, str]:
+    def get_settings_by_lane(self, lane: str | None = None) -> CaseInsensitiveDict:
         """Get settings filtered by lane specification.
 
         Args:
@@ -210,7 +212,7 @@ class AvitiSettings(BaseModel):
         Returns:
             Dictionary of setting name to value for the specified lane.
         """
-        result = {}
+        result = CaseInsensitiveDict({})
         for setting in self.settings.entries:
             if setting.lane == lane:
                 result[setting.name] = setting.value
