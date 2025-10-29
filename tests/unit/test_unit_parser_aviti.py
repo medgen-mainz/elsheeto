@@ -144,7 +144,7 @@ class TestParseSettings:
         assert settings.data["R1FastQMask"] == "R1:Y*N"
 
         # Test new lane-specific functionality
-        assert len(settings.settings) == 4  # Header row should be skipped
+        assert len(settings.settings.entries) == 4  # Header row should be skipped
         assert settings.get_all_lanes() == {"1+2"}
 
         # Test lane-specific settings

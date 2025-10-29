@@ -11,6 +11,7 @@ from pydantic import ValidationError
 from elsheeto.models.aviti import (
     AvitiRunValues,
     AvitiSample,
+    AvitiSettingEntries,
     AvitiSettingEntry,
     AvitiSettings,
     AvitiSheet,
@@ -141,7 +142,7 @@ class Parser:
                         )
                     # Skip empty rows (len(non_empty_cells) == 0)
 
-                return AvitiSettings(settings=settings, extra_metadata=extra_metadata)
+                return AvitiSettings(settings=AvitiSettingEntries(entries=settings), extra_metadata=extra_metadata)
 
         return None
 
