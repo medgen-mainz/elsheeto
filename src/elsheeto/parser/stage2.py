@@ -83,12 +83,8 @@ class Parser:
         Returns:
             True if this should be treated as a data section.
         """
-        # Check if section name matches known data section names
-        section_name = (
-            section.name.lower() if self.config.section_header_case.is_case_sensitive() else section.name.lower()
-        )
-
-        if section_name in DATA_SECTION_NAMES:
+        # Check if section name matches known data section names (case-insensitive comparison)
+        if section.name.lower() in DATA_SECTION_NAMES:
             return True
 
         # For sectionless sheets, treat the unnamed section as data if it has tabular structure
@@ -206,10 +202,6 @@ class Parser:
             # Extract headers from first row
             header_row = section.data[0]
             headers = [cell.strip() for cell in header_row]
-
-            # Apply case transformations to headers if configured
-            if not self.config.column_header_case.is_case_sensitive():
-                headers = [h.lower() for h in headers]
 
             # Remaining rows are data
             data_rows = section.data[1:]

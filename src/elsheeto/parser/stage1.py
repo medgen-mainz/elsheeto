@@ -229,8 +229,6 @@ class Parser:
         first_cell = row[0].strip()
         if first_cell.startswith("[") and first_cell.endswith("]"):
             section_name = first_cell[1:-1]
-            if not self.config.section_header_case.is_case_sensitive():
-                section_name = section_name.lower()
             return section_name
 
         return None

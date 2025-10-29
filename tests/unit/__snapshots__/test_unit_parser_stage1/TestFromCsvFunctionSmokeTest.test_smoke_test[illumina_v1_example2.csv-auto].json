@@ -114,7 +114,7 @@
           ""
         ]
       ],
-      "name": "header",
+      "name": "Header",
       "num_columns": 9
     },
     {
@@ -153,12 +153,12 @@
           ""
         ]
       ],
-      "name": "reads",
+      "name": "Reads",
       "num_columns": 9
     },
     {
       "data": [],
-      "name": "settings",
+      "name": "Settings",
       "num_columns": 0
     },
     {
@@ -197,7 +197,7 @@
           ""
         ]
       ],
-      "name": "data",
+      "name": "Data",
       "num_columns": 9
     }
   ],

@@ -134,7 +134,7 @@
           ""
         ]
       ],
-      "name": "header",
+      "name": "Header",
       "num_columns": 11
     },
     {
@@ -166,12 +166,12 @@
           ""
         ]
       ],
-      "name": "reads",
+      "name": "Reads",
       "num_columns": 11
     },
     {
       "data": [],
-      "name": "settings",
+      "name": "Settings",
       "num_columns": 0
     },
     {
@@ -242,7 +242,7 @@
           "NGS_Seq1_20111111_01"
         ]
       ],
-      "name": "data",
+      "name": "Data",
       "num_columns": 11
     }
   ],

@@ -12,7 +12,7 @@
           " AGTTGACAAGCGGTAGCCTGCACACCTTCCGACAT"
         ]
       ],
-      "name": "settings",
+      "name": "Settings",
       "num_columns": 2
     },
     {
@@ -33,7 +33,7 @@
           "CACCAAGTGG"
         ]
       ],
-      "name": "samples",
+      "name": "Samples",
       "num_columns": 3
     }
   ],

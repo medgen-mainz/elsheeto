@@ -8,14 +8,14 @@
       ]
     ],
     "header_to_index": {
-      "sample_id": 0,
-      "sample_name": 1,
-      "sample_project": 2
+      "Sample_ID": 0,
+      "Sample_Name": 1,
+      "Sample_Project": 2
     },
     "headers": [
-      "sample_id",
-      "sample_name",
-      "sample_project"
+      "Sample_ID",
+      "Sample_Name",
+      "Sample_Project"
     ]
   },
   "delimiter": ",",
