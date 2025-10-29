@@ -114,14 +114,75 @@ class AvitiSettingEntry(BaseModel):
     model_config = ConfigDict(frozen=True)
 
 
+class AvitiSettingEntries(BaseModel):
+    """Collection of Aviti setting entries with convenience methods for retrieval."""
+
+    #: List of setting entries (may include lane-specific settings).
+    entries: list[AvitiSettingEntry] = Field(default_factory=list)
+
+    model_config = ConfigDict(frozen=True)
+
+    def get_all_by_key(self, key: str) -> list[AvitiSettingEntry]:
+        """Get all setting entries with the specified key.
+
+        Args:
+            key: Setting name to search for.
+
+        Returns:
+            List of all setting entries with the specified key.
+        """
+        return [entry for entry in self.entries if entry.name == key]
+
+    def get_by_key(self, key: str) -> AvitiSettingEntry:
+        """Get exactly one setting entry with the specified key.
+
+        Args:
+            key: Setting name to search for.
+
+        Returns:
+            The single setting entry with the specified key.
+
+        Raises:
+            ValueError: If zero or more than one entry found with the key.
+        """
+        matches = self.get_all_by_key(key)
+        if len(matches) == 0:
+            raise ValueError(f"No setting found with key: {key}")
+        if len(matches) > 1:
+            raise ValueError(f"Multiple settings found with key: {key} (found {len(matches)})")
+        return matches[0]
+
+    def get_by_key_and_lane(self, key: str, lane: str | None) -> AvitiSettingEntry:
+        """Get exactly one setting entry with exact key and lane match.
+
+        Args:
+            key: Setting name to search for.
+            lane: Lane specification to match exactly (None for no lane).
+
+        Returns:
+            The setting entry with exact key and lane match.
+
+        Raises:
+            ValueError: If zero or more than one entry found with the key and lane combination.
+        """
+        matches = [entry for entry in self.entries if entry.name == key and entry.lane == lane]
+        if len(matches) == 0:
+            lane_str = "None" if lane is None else f"'{lane}'"
+            raise ValueError(f"No setting found with key: {key} and lane: {lane_str}")
+        if len(matches) > 1:
+            lane_str = "None" if lane is None else f"'{lane}'"
+            raise ValueError(f"Multiple settings found with key: {key} and lane: {lane_str} (found {len(matches)})")
+        return matches[0]
+
+
 class AvitiSettings(BaseModel):
     """Representation of the `Settings` section of an Aviti sample sheet.
 
     Supports both simple key-value pairs and lane-specific settings with 3-column structure.
     """
 
-    #: List of setting entries (may include lane-specific settings).
-    settings: list[AvitiSettingEntry] = Field(default_factory=list)
+    #: Collection of setting entries (may include lane-specific settings).
+    settings: AvitiSettingEntries = Field(default_factory=AvitiSettingEntries)
     #: Optional extra metadata.
     extra_metadata: dict[str, str] = Field(default_factory=dict)
 
@@ -134,7 +195,7 @@ class AvitiSettings(BaseModel):
         For lane-specific settings, only returns the first occurrence of each setting name.
         """
         result = {}
-        for setting in self.settings:
+        for setting in self.settings.entries:
             if setting.name not in result:
                 result[setting.name] = setting.value
         return result
@@ -150,7 +211,7 @@ class AvitiSettings(BaseModel):
             Dictionary of setting name to value for the specified lane.
         """
         result = {}
-        for setting in self.settings:
+        for setting in self.settings.entries:
             if setting.lane == lane:
                 result[setting.name] = setting.value
         return result
@@ -161,7 +222,7 @@ class AvitiSettings(BaseModel):
         Returns:
             Set of all lane specifications (excluding None).
         """
-        return {setting.lane for setting in self.settings if setting.lane is not None}
+        return {setting.lane for setting in self.settings.entries if setting.lane is not None}
 
 
 class AvitiSheet(BaseModel):

@@ -6,6 +6,7 @@ from pydantic import ValidationError
 from elsheeto.models.aviti import (
     AvitiRunValues,
     AvitiSample,
+    AvitiSettingEntries,
     AvitiSettingEntry,
     AvitiSettings,
     AvitiSheet,
@@ -156,10 +157,12 @@ class TestAvitiSettings:
         """Test creating settings with data."""
 
         settings = AvitiSettings(
-            settings=[
-                AvitiSettingEntry(name="R1Adapter", value="ATGC"),
-                AvitiSettingEntry(name="R2Adapter", value="CGTA"),
-            ],
+            settings=AvitiSettingEntries(
+                entries=[
+                    AvitiSettingEntry(name="R1Adapter", value="ATGC"),
+                    AvitiSettingEntry(name="R2Adapter", value="CGTA"),
+                ]
+            ),
             extra_metadata={"Extra": "Data"},
         )
         assert settings.data == {"R1Adapter": "ATGC", "R2Adapter": "CGTA"}
@@ -168,13 +171,15 @@ class TestAvitiSettings:
     def test_settings_lane_specific(self):
         """Test lane-specific settings functionality."""
         settings = AvitiSettings(
-            settings=[
-                AvitiSettingEntry(name="SpikeInAsUnassigned", value="FALSE"),  # No lane
-                AvitiSettingEntry(name="R1FastQMask", value="R1:Y*N", lane="1+2"),
-                AvitiSettingEntry(name="R2FastQMask", value="R2:Y*N", lane="1+2"),
-                AvitiSettingEntry(name="I1Fastq", value="FALSE", lane="1"),
-                AvitiSettingEntry(name="I2Fastq", value="FALSE", lane="2"),
-            ],
+            settings=AvitiSettingEntries(
+                entries=[
+                    AvitiSettingEntry(name="SpikeInAsUnassigned", value="FALSE"),  # No lane
+                    AvitiSettingEntry(name="R1FastQMask", value="R1:Y*N", lane="1+2"),
+                    AvitiSettingEntry(name="R2FastQMask", value="R2:Y*N", lane="1+2"),
+                    AvitiSettingEntry(name="I1Fastq", value="FALSE", lane="1"),
+                    AvitiSettingEntry(name="I2Fastq", value="FALSE", lane="2"),
+                ]
+            )
         )
 
         # Test backward compatibility
@@ -204,6 +209,116 @@ class TestAvitiSettings:
         assert lane_2_settings == {"I2Fastq": "FALSE"}
 
 
+class TestAvitiSettingEntries:
+    """Test AvitiSettingEntries model and its convenience methods."""
+
+    def test_get_all_by_key(self):
+        """Test get_all_by_key method."""
+        entries = AvitiSettingEntries(
+            entries=[
+                AvitiSettingEntry(name="R1Adapter", value="ATGC"),
+                AvitiSettingEntry(name="R1Adapter", value="GGGG", lane="1"),
+                AvitiSettingEntry(name="R2Adapter", value="CGTA"),
+            ]
+        )
+
+        # Get all R1Adapter entries
+        r1_entries = entries.get_all_by_key("R1Adapter")
+        assert len(r1_entries) == 2
+        assert r1_entries[0].value == "ATGC"
+        assert r1_entries[0].lane is None
+        assert r1_entries[1].value == "GGGG"
+        assert r1_entries[1].lane == "1"
+
+        # Get R2Adapter entries
+        r2_entries = entries.get_all_by_key("R2Adapter")
+        assert len(r2_entries) == 1
+        assert r2_entries[0].value == "CGTA"
+
+        # Get non-existent key
+        non_existent = entries.get_all_by_key("NonExistent")
+        assert len(non_existent) == 0
+
+    def test_get_by_key_success(self):
+        """Test get_by_key method with exactly one match."""
+        entries = AvitiSettingEntries(
+            entries=[
+                AvitiSettingEntry(name="R1Adapter", value="ATGC"),
+                AvitiSettingEntry(name="R2Adapter", value="CGTA"),
+            ]
+        )
+
+        entry = entries.get_by_key("R1Adapter")
+        assert entry.value == "ATGC"
+        assert entry.lane is None
+
+    def test_get_by_key_not_found(self):
+        """Test get_by_key method with no matches."""
+        entries = AvitiSettingEntries(entries=[AvitiSettingEntry(name="R1Adapter", value="ATGC")])
+
+        with pytest.raises(ValueError, match="No setting found with key: NonExistent"):
+            entries.get_by_key("NonExistent")
+
+    def test_get_by_key_multiple_found(self):
+        """Test get_by_key method with multiple matches."""
+        entries = AvitiSettingEntries(
+            entries=[
+                AvitiSettingEntry(name="R1Adapter", value="ATGC"),
+                AvitiSettingEntry(name="R1Adapter", value="GGGG", lane="1"),
+            ]
+        )
+
+        with pytest.raises(ValueError, match="Multiple settings found with key: R1Adapter \\(found 2\\)"):
+            entries.get_by_key("R1Adapter")
+
+    def test_get_by_key_and_lane_success(self):
+        """Test get_by_key_and_lane method with exact match."""
+        entries = AvitiSettingEntries(
+            entries=[
+                AvitiSettingEntry(name="R1Adapter", value="ATGC"),
+                AvitiSettingEntry(name="R1Adapter", value="GGGG", lane="1"),
+                AvitiSettingEntry(name="R1Adapter", value="TTTT", lane="2"),
+            ]
+        )
+
+        # Get by key and no lane
+        entry = entries.get_by_key_and_lane("R1Adapter", None)
+        assert entry.value == "ATGC"
+        assert entry.lane is None
+
+        # Get by key and specific lane
+        entry = entries.get_by_key_and_lane("R1Adapter", "1")
+        assert entry.value == "GGGG"
+        assert entry.lane == "1"
+
+        entry = entries.get_by_key_and_lane("R1Adapter", "2")
+        assert entry.value == "TTTT"
+        assert entry.lane == "2"
+
+    def test_get_by_key_and_lane_not_found(self):
+        """Test get_by_key_and_lane method with no matches."""
+        entries = AvitiSettingEntries(entries=[AvitiSettingEntry(name="R1Adapter", value="ATGC", lane="1")])
+
+        with pytest.raises(ValueError, match="No setting found with key: R1Adapter and lane: None"):
+            entries.get_by_key_and_lane("R1Adapter", None)
+
+        with pytest.raises(ValueError, match="No setting found with key: NonExistent and lane: '1'"):
+            entries.get_by_key_and_lane("NonExistent", "1")
+
+    def test_get_by_key_and_lane_multiple_found(self):
+        """Test get_by_key_and_lane method with multiple matches (should not happen in practice)."""
+        # This would be an invalid state, but test the error handling
+        entries = AvitiSettingEntries(
+            entries=[
+                AvitiSettingEntry(name="R1Adapter", value="ATGC", lane="1"),
+                AvitiSettingEntry(name="R1Adapter", value="GGGG", lane="1"),  # Duplicate key+lane
+            ]
+        )
+
+        with pytest.raises(ValueError, match="Multiple settings found with key: R1Adapter and lane: '1' \\(found 2\\)"):
+            entries.get_by_key_and_lane("R1Adapter", "1")
+
+
 class TestAvitiSheet:
     """Test AvitiSheet model."""
 
@@ -221,7 +336,9 @@ class TestAvitiSheet:
         """Test creating complete Aviti sheet."""
         sample = AvitiSample(sample_name="Sample1", index1="ATGC", index2="TCGA")
         run_values = AvitiRunValues(data={"RunId": "Run123"})
-        settings = AvitiSettings(settings=[AvitiSettingEntry(name="R1Adapter", value="ATGC")])
+        settings = AvitiSettings(
+            settings=AvitiSettingEntries(entries=[AvitiSettingEntry(name="R1Adapter", value="ATGC")])
+        )
 
         sheet = AvitiSheet(
             run_values=run_values,
