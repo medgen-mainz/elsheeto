@@ -11,7 +11,7 @@ import elsheeto.parser.stage1 as parser_stage1
 from elsheeto.models.common import ParsedSheetType
 from elsheeto.models.csv_stage1 import ParsedRawSection, ParsedRawSheet
 from elsheeto.models.csv_stage2 import ParsedSheet
-from elsheeto.parser.common import CaseConsistency, CsvDelimiter, ParserConfiguration
+from elsheeto.parser.common import CsvDelimiter, ParserConfiguration
 from elsheeto.parser.stage2 import Parser, from_stage1
 
 
@@ -69,10 +69,10 @@ class TestParser:
 
         # Check data section
         data = result.data_section
-        assert data.headers == ["sample_id", "sample_name", "sample_plate", "sample_well"]
+        assert data.headers == ["Sample_ID", "Sample_Name", "Sample_Plate", "Sample_Well"]
         assert len(data.data) == 2
         assert data.data[0] == ["S1", "Sample1", "Plate1", "A01"]
-        assert data.header_to_index["sample_id"] == 0
+        assert data.header_to_index["Sample_ID"] == 0
 
     def test_parse_aviti_style_sectioned(self):
         """Test parsing Aviti-style sectioned data."""
@@ -102,7 +102,7 @@ class TestParser:
 
         # Check data section
         data = result.data_section
-        assert data.headers == ["samplename", "index1", "index2", "lane"]
+        assert data.headers == ["SampleName", "Index1", "Index2", "Lane"]
         assert len(data.data) == 2
         assert data.data[0] == ["Sample_1", "CCC", "AAA", "1"]
 
@@ -134,7 +134,7 @@ class TestParser:
 
         # Check data section
         data = result.data_section
-        assert data.headers == ["sample_id", "sample_name", "project"]
+        assert data.headers == ["Sample_ID", "Sample_Name", "Project"]
         assert len(data.data) == 2
 
     def test_parse_multiple_header_sections(self):
@@ -217,7 +217,7 @@ class TestParser:
         assert result.data_section.data == []
 
     def test_case_sensitivity_headers(self):
-        """Test case sensitivity for headers."""
+        """Test that headers preserve original case."""
         raw_sheet = ParsedRawSheet(
             delimiter=",",
             sheet_type=ParsedSheetType.SECTIONED,
@@ -235,19 +235,8 @@ class TestParser:
             ],
         )
 
-        # Case insensitive (default)
+        # Stage 2 should preserve original case
         config = ParserConfiguration()
-        parser = Parser(config)
-        result = parser.parse(raw_sheet=raw_sheet)
-
-        assert "KEY1" in result.header_sections[0].key_values
-        assert result.data_section.headers == ["col1", "col2"]
-
-        # Case sensitive
-        config = ParserConfiguration(
-            key_case=CaseConsistency.CASE_SENSITIVE,
-            column_header_case=CaseConsistency.CASE_SENSITIVE,
-        )
         parser = Parser(config)
         result = parser.parse(raw_sheet=raw_sheet)
 
@@ -383,10 +372,10 @@ class TestParser:
             ],
         )
         result = parser._convert_to_data_section(section)
-        assert result.headers == ["col1", "col2", "col3"]
+        assert result.headers == ["Col1", "Col2", "Col3"]
         assert len(result.data) == 2
-        assert result.header_to_index["col1"] == 0
-        assert result.header_to_index["col3"] == 2
+        assert result.header_to_index["Col1"] == 0
+        assert result.header_to_index["Col3"] == 2
 
         # Empty section
         empty_section = ParsedRawSection(name="empty", num_columns=0, data=[])
@@ -422,7 +411,7 @@ class TestParser:
         # Should warn about multiple data sections
         assert "Multiple data sections found" in caplog.text
         # Should use the last data section (samples)
-        assert result.data_section.headers == ["sample", "index"]
+        assert result.data_section.headers == ["Sample", "Index"]
 
     def test_header_row_flexible_fields(self):
         """Test that header rows with any number of fields are now accepted."""

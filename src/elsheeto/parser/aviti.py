@@ -17,6 +17,7 @@ from elsheeto.models.aviti import (
     AvitiSheet,
 )
 from elsheeto.models.csv_stage2 import ParsedSheet
+from elsheeto.models.utils import CaseInsensitiveDict
 from elsheeto.parser.common import ParserConfiguration
 
 #: The module logger.
@@ -86,7 +87,9 @@ class Parser:
         # Find the "runvalues" section by name (case-insensitive)
         for section in parsed_sheet.header_sections:
             if section.name.lower() == "runvalues":
-                return AvitiRunValues(data=section.key_values, extra_metadata={})
+                return AvitiRunValues(
+                    data=CaseInsensitiveDict(section.key_values), extra_metadata=CaseInsensitiveDict({})
+                )
 
         return None
 
@@ -142,7 +145,9 @@ class Parser:
                         )
                     # Skip empty rows (len(non_empty_cells) == 0)
 
-                return AvitiSettings(settings=AvitiSettingEntries(entries=settings), extra_metadata=extra_metadata)
+                return AvitiSettings(
+                    settings=AvitiSettingEntries(entries=settings), extra_metadata=CaseInsensitiveDict(extra_metadata)
+                )
 
         return None
 

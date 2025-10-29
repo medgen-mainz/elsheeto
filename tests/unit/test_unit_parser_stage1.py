@@ -10,7 +10,6 @@ from syrupy.assertion import SnapshotAssertion
 from elsheeto.models.common import ParsedSheetType
 from elsheeto.models.csv_stage1 import ParsedRawSheet
 from elsheeto.parser.common import (
-    CaseConsistency,
     ColumnConsistency,
     CsvDelimiter,
     ParserConfiguration,
@@ -48,14 +47,14 @@ L11-00002_01,,TestPlate,B01
 
         # Check Header section
         header_section = result.sections[0]
-        assert header_section.name == "header"
+        assert header_section.name == "Header"
         assert header_section.num_columns == 5
         assert len(header_section.data) == 2  # Two non-empty rows
         assert header_section.data[0] == ["IEMFileVersion", "5", "", "", ""]
 
         # Check Data section
         data_section = result.sections[1]
-        assert data_section.name == "data"
+        assert data_section.name == "Data"
         assert data_section.num_columns == 4
         assert len(data_section.data) == 3  # Header + 2 data rows
         assert data_section.data[0] == ["Sample_ID", "Sample_Name", "Sample_Plate", "Sample_Well"]
@@ -76,7 +75,7 @@ Sample_2,TTT,GGG,1
         assert len(result.sections) == 1
 
         samples_section = result.sections[0]
-        assert samples_section.name == "samples"
+        assert samples_section.name == "Samples"
         assert samples_section.num_columns == 4
         assert len(samples_section.data) == 3  # Header + 2 data rows
 
@@ -126,7 +125,7 @@ TestKey,TestValue
 
         assert len(result.sections) == 1
         header_section = result.sections[0]
-        assert header_section.name == "header"
+        assert header_section.name == "Header"
         assert len(header_section.data) == 2  # Key,Value and TestKey,TestValue
 
     def test_parse_with_empty_lines(self):
@@ -145,7 +144,7 @@ TestKey,TestValue
 
         assert len(result.sections) == 1
         header_section = result.sections[0]
-        assert header_section.name == "header"
+        assert header_section.name == "Header"
         assert len(header_section.data) == 2
 
     def test_parse_without_ignoring_empty_lines(self):
@@ -162,19 +161,13 @@ Key,Value
         assert len(header_section.data) == 2  # Empty row and Key,Value row
 
     def test_case_sensitivity_section_headers(self):
-        """Test case sensitivity for section headers."""
+        """Test that section headers preserve original case."""
         data = """[HEADER]
 Key,Value
 TestKey,TestValue
 """
-        # Case insensitive (default)
+        # Stage 1 should preserve original case
         config = ParserConfiguration()
-        parser = Parser(config)
-        result = parser.parse(data=data)
-        assert result.sections[0].name == "header"
-
-        # Case sensitive
-        config = ParserConfiguration(section_header_case=CaseConsistency.CASE_SENSITIVE)
         parser = Parser(config)
         result = parser.parse(data=data)
         assert result.sections[0].name == "HEADER"
@@ -218,7 +211,7 @@ A,B,C
         config = ParserConfiguration(column_consistency=ColumnConsistency.STRICT_SECTIONED)
         parser = Parser(config)
 
-        with pytest.raises(ValueError, match="Section 'section1' column consistency violated"):
+        with pytest.raises(ValueError, match="Section 'Section1' column consistency violated"):
             parser.parse(data=data)
 
     def test_column_consistency_strict_global(self):
@@ -282,16 +275,16 @@ X,Y
         config = ParserConfiguration()
         parser = Parser(config)
 
-        assert parser._extract_section_name(["[Header]"]) == "header"
-        assert parser._extract_section_name(["  [Data]  "]) == "data"
-        assert parser._extract_section_name(["[Settings]", "extra", "columns"]) == "settings"
+        assert parser._extract_section_name(["[Header]"]) == "Header"
+        assert parser._extract_section_name(["  [Data]  "]) == "Data"
+        assert parser._extract_section_name(["[Settings]", "extra", "columns"]) == "Settings"
         assert parser._extract_section_name(["not a section"]) is None
         assert parser._extract_section_name(["[incomplete"]) is None
         assert parser._extract_section_name([""]) is None
 
-    def test_extract_section_name_case_sensitive(self):
-        """Test section name extraction with case sensitivity."""
-        config = ParserConfiguration(section_header_case=CaseConsistency.CASE_SENSITIVE)
+    def test_extract_section_name_preserves_case(self):
+        """Test section name extraction preserves original case."""
+        config = ParserConfiguration()
         parser = Parser(config)
 
         assert parser._extract_section_name(["[Header]"]) == "Header"
@@ -344,7 +337,7 @@ TestKey,TestValue
         assert isinstance(result, ParsedRawSheet)
         assert result.sheet_type == ParsedSheetType.SECTIONED
         assert len(result.sections) == 1
-        assert result.sections[0].name == "header"
+        assert result.sections[0].name == "Header"
 
 
 class TestFromCsvFunctionSmokeTest:

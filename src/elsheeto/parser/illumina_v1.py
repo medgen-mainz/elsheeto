@@ -16,6 +16,7 @@ from elsheeto.models.illumina_v1 import (
     IlluminaSampleSheet,
     IlluminaSettings,
 )
+from elsheeto.models.utils import CaseInsensitiveDict
 from elsheeto.parser.common import ParserConfiguration
 
 #: The module logger.
@@ -111,7 +112,7 @@ class Parser:
                 description=None,
                 chemistry=None,
                 run=None,
-                extra_metadata={},
+                extra_metadata=CaseInsensitiveDict({}),
             )
 
         # Extract key-value pairs from header section

@@ -7,6 +7,8 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from elsheeto.models.utils import CaseInsensitiveDict
+
 
 class IlluminaHeader(BaseModel):
     """Representation of the Illumina v1 `Header` section."""
@@ -38,7 +40,7 @@ class IlluminaHeader(BaseModel):
     run: Annotated[str | None, Field(default=None)]
 
     #: Optional extra metadata for fields not explicitly defined.
-    extra_metadata: Annotated[dict[str, str], Field(default_factory=dict)]
+    extra_metadata: Annotated[CaseInsensitiveDict, Field(default_factory=CaseInsensitiveDict)]
 
     #: Model configuration.
     model_config = ConfigDict(frozen=True)
@@ -62,10 +64,10 @@ class IlluminaSettings(BaseModel):
     """
 
     #: Key/value data in the settings section.
-    data: dict[str, str]
+    data: CaseInsensitiveDict
 
     #: Optional extra metadata.
-    extra_metadata: Annotated[dict[str, str], Field(default_factory=dict)]
+    extra_metadata: Annotated[CaseInsensitiveDict, Field(default_factory=CaseInsensitiveDict)]
 
     #: Model configuration.
     model_config = ConfigDict(frozen=True)
@@ -102,7 +104,7 @@ class IlluminaSample(BaseModel):
     description: Annotated[str | None, Field(default=None)]
 
     #: Optional extra metadata for fields not explicitly defined.
-    extra_metadata: Annotated[dict[str, str], Field(default_factory=dict)]
+    extra_metadata: Annotated[CaseInsensitiveDict, Field(default_factory=CaseInsensitiveDict)]
 
     #: Model configuration.
     model_config = ConfigDict(frozen=True)

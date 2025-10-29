@@ -137,7 +137,7 @@
           ""
         ]
       ],
-      "name": "settings",
+      "name": "SETTINGS",
       "num_columns": 5
     },
     {
@@ -157,7 +157,7 @@
           ""
         ]
       ],
-      "name": "runvalues",
+      "name": "RunValues",
       "num_columns": 5
     },
     {
@@ -212,7 +212,7 @@
           ""
         ]
       ],
-      "name": "samples",
+      "name": "SAMPLES",
       "num_columns": 5
     }
   ],

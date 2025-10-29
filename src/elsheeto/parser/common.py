@@ -30,19 +30,6 @@ class CsvDelimiter(str, Enum):
                 return [";"]
 
 
-class CaseConsistency(str, Enum):
-    """Modes for handling upper/lower case in sections and headers/keys."""
-
-    #: Case-sensitive mode.
-    CASE_SENSITIVE = "case_sensitive"
-    #: Case-insensitive mode.
-    CASE_INSENSITIVE = "case_insensitive"
-
-    def is_case_sensitive(self) -> bool:
-        """Return whether the mode is case-sensitive."""
-        return self == CaseConsistency.CASE_SENSITIVE
-
-
 class ColumnConsistency(str, Enum):
     """Modes for handling inconsistent columns in CSV files."""
 
@@ -69,12 +56,6 @@ class ParserConfiguration(BaseModel):
     ignore_empty_lines: bool = True
     #: Line prefixes to recognize as comments.
     comment_prefixes: list[str] = ["#"]
-    #: Case sensitivity configuration for section headers.
-    section_header_case: CaseConsistency = CaseConsistency.CASE_INSENSITIVE
-    #: Case sensitivity configuration for column headers.
-    column_header_case: CaseConsistency = CaseConsistency.CASE_INSENSITIVE
-    #: Case sensitivity for keys.
-    key_case: CaseConsistency = CaseConsistency.CASE_INSENSITIVE
     #: Column consistency configuration.
     column_consistency: ColumnConsistency = ColumnConsistency.STRICT_SECTIONED
 

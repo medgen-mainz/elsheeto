@@ -28,7 +28,7 @@
           ""
         ]
       ],
-      "name": "header",
+      "name": "Header",
       "num_columns": 4
     },
     {
@@ -44,7 +44,7 @@
           ""
         ]
       ],
-      "name": "reads",
+      "name": "Reads",
       "num_columns": 3
     },
     {
@@ -60,7 +60,7 @@
           "Project1"
         ]
       ],
-      "name": "data",
+      "name": "Data",
       "num_columns": 3
     }
   ],

@@ -24,6 +24,14 @@ Data Models - Common
    :undoc-members:
    :show-inheritance:
 
+Data Models - Utils
+~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: elsheeto.models.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Data Models - Stage 1 (Raw CSV)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

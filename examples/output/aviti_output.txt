@@ -1,3 +1,77 @@
 Reading Aviti sample sheet: examples/aviti_example1.csv
 =================================================================
-Error parsing sample sheet: Header row contains more than 2 non-empty fields: ['SettingName', 'Value', 'Lane']
+RUN VALUES:
+-----------------------------------
+  Keyname: Value
+  Example-Custom-Key: Additional metadata can be added as a key-value pair.
+
+SETTINGS:
+-----------------------------------
+  General Settings:
+    SpikeInAsUnassigned: FALSE
+
+  Sequencing Configuration:
+    R1FastQMask: R1:Y*N
+    R2FastQMask: R2:Y*N
+    I1Mask: I1:Y*
+    I1Fastq: FALSE
+    I1MismatchThreshold: 1
+    I2Mask: I2:Y*
+    I2Fastq: FALSE
+    I2MismatchThreshold: 1
+    UmiMask: I1:N*
+    UmiFastQ: FALSE
+    R1AdapterNMask: FALSE
+    R2AdapterNMask: FALSE
+
+  Adapter Settings:
+    AdapterTrimType: Paired-End
+    R1Adapter: 1+2
+    R1AdapterTrim: FALSE
+    R2Adapter: 1+2
+    R2AdapterTrim: FALSE
+
+SAMPLE INFORMATION:
+-----------------------------------
+Total samples: 6
+
+PhiX Control Samples:
+   1. Sample Name: PhiX
+      Index1: ATGTCGCTAG
+      Index2: CTAGCTCGTA
+      Lane: 1+2
+
+   2. Sample Name: PhiX
+      Index1: CACAGATCGT
+      Index2: ACGAGAGTCT
+      Lane: 1+2
+
+   3. Sample Name: PhiX
+      Index1: GCACATAGTC
+      Index2: GACTACTAGC
+      Lane: 1+2
+
+   4. Sample Name: PhiX
+      Index1: TGTGTCGACA
+      Index2: TGTCTGACAG
+      Lane: 1+2
+
+Regular Samples:
+   1. Sample Name: ExampleSample_1
+      Index1: AAAAAAAAAA
+      Index2: GGGGGGGGGG
+      Lane: 1+2
+
+   2. Sample Name: ExampleSample_2
+      Index1: TTTTTTTTTT
+      Index2: CCCCCCCCCC
+      Lane: 1+2
+
+SUMMARY STATISTICS:
+-----------------------------------
+Lanes used: 1, 2
+PhiX control samples: 4
+Regular samples: 2
+Dual-indexed samples: 6
+Samples with composite Index1: 0
+Samples with composite Index2: 0

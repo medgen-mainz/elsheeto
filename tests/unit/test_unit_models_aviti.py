@@ -11,6 +11,7 @@ from elsheeto.models.aviti import (
     AvitiSettings,
     AvitiSheet,
 )
+from elsheeto.models.utils import CaseInsensitiveDict
 
 
 class TestAvitiSample:
@@ -113,7 +114,7 @@ class TestAvitiSample:
             project="Project1",
             external_id="EXT123",
             description="Test sample",
-            extra_metadata={"Custom": "Value"},
+            extra_metadata=CaseInsensitiveDict({"Custom": "Value"}),
         )
         assert sample.sample_name == "Sample1"
         assert sample.index1 == "ATGC"
@@ -137,8 +138,8 @@ class TestAvitiRunValues:
     def test_run_values_with_data(self):
         """Test creating run values with data."""
         run_values = AvitiRunValues(
-            data={"KeyName": "Value1", "RunId": "Run123"},
-            extra_metadata={"Extra": "Data"},
+            data=CaseInsensitiveDict({"KeyName": "Value1", "RunId": "Run123"}),
+            extra_metadata=CaseInsensitiveDict({"Extra": "Data"}),
         )
         assert run_values.data == {"KeyName": "Value1", "RunId": "Run123"}
         assert run_values.extra_metadata == {"Extra": "Data"}
@@ -163,7 +164,7 @@ class TestAvitiSettings:
                     AvitiSettingEntry(name="R2Adapter", value="CGTA"),
                 ]
             ),
-            extra_metadata={"Extra": "Data"},
+            extra_metadata=CaseInsensitiveDict({"Extra": "Data"}),
         )
         assert settings.data == {"R1Adapter": "ATGC", "R2Adapter": "CGTA"}
         assert settings.extra_metadata == {"Extra": "Data"}
@@ -335,7 +336,7 @@ class TestAvitiSheet:
     def test_complete_aviti_sheet(self):
         """Test creating complete Aviti sheet."""
         sample = AvitiSample(sample_name="Sample1", index1="ATGC", index2="TCGA")
-        run_values = AvitiRunValues(data={"RunId": "Run123"})
+        run_values = AvitiRunValues(data=CaseInsensitiveDict({"RunId": "Run123"}))
         settings = AvitiSettings(
             settings=AvitiSettingEntries(entries=[AvitiSettingEntry(name="R1Adapter", value="ATGC")])
         )

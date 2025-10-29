@@ -20,7 +20,7 @@
           "GenerateFASTQ"
         ]
       ],
-      "name": "header",
+      "name": "Header",
       "num_columns": 2
     },
     {
@@ -32,7 +32,7 @@
           "151"
         ]
       ],
-      "name": "reads",
+      "name": "Reads",
       "num_columns": 1
     },
     {
@@ -48,7 +48,7 @@
           "Project1"
         ]
       ],
-      "name": "data",
+      "name": "Data",
       "num_columns": 3
     }
   ],
