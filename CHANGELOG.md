@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/medgen-mainz/elsheeto/compare/elsheeto-v0.2.1...elsheeto-v0.2.2) (2025-10-29)
+
+
+### Bug Fixes
+
+* pydantic serialization of CaseInsensitiveDict ([#23](https://github.com/medgen-mainz/elsheeto/issues/23)) ([8e3cd10](https://github.com/medgen-mainz/elsheeto/commit/8e3cd10ad29c743536fa1aa19de53946d8696225))
+
 ## [0.2.1](https://github.com/medgen-mainz/elsheeto/compare/elsheeto-v0.2.0...elsheeto-v0.2.1) (2025-10-29)
 
 
