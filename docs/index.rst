@@ -11,6 +11,7 @@ Features
 * **Type safety**: Full type annotations with Pydantic validation
 * **Three-stage parsing**: Raw CSV → Structured data → Platform-specific models
 * **Robust error handling**: Comprehensive validation and error reporting
+* **Flexible column consistency**: Automatic padding or strict validation modes
 * **Easy-to-use API**: Simple facade functions for common use cases
 
 Quick Start
@@ -59,6 +60,35 @@ elsheeto uses a three-stage parsing architecture:
 3. **Stage 3 (Platform-specific)**: Transform into validated platform-specific models
 
 This architecture ensures robust parsing and allows for easy extension to new platforms.
+
+Column Consistency Modes
+------------------------
+
+elsheeto provides flexible handling of CSV files with inconsistent column counts:
+
+* **WARN_AND_PAD (default)**: Automatically pads missing cells with empty strings and issues warnings
+* **PAD**: Silently pads missing cells without warnings
+* **STRICT_SECTIONED**: Requires consistent columns within each section (raises exceptions)
+* **STRICT_GLOBAL**: Requires the same column count across all sections (raises exceptions)
+* **LOOSE**: No consistency requirements
+
+The default behavior changed from strict validation to warning-based padding to improve usability with real-world sample sheets that may have formatting inconsistencies.
+
+.. code-block:: python
+
+   from elsheeto import parse_illumina_v1
+   from elsheeto.parser.common import ColumnConsistency, ParserConfiguration
+
+   # Default: warnings for inconsistencies, automatic padding
+   sheet = parse_illumina_v1("samplesheet.csv")
+
+   # Silent padding (no warnings)
+   config = ParserConfiguration(column_consistency=ColumnConsistency.PAD)
+   sheet = parse_illumina_v1("samplesheet.csv", config=config)
+
+   # Strict validation (old behavior)
+   config = ParserConfiguration(column_consistency=ColumnConsistency.STRICT_SECTIONED)
+   sheet = parse_illumina_v1("samplesheet.csv", config=config)
 
 Table of Contents
 -----------------
