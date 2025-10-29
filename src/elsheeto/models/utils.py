@@ -87,12 +87,19 @@ class CaseInsensitiveDict[_KT, _VT](MutableMapping[_KT, _VT]):
 
     @classmethod
     def __get_pydantic_core_schema__(cls, source_type: Any, handler: GetCoreSchemaHandler) -> core_schema.CoreSchema:
-        """Generate pydantic core schema for validation."""
-        return core_schema.no_info_after_validator_function(
+        """Generate pydantic core schema for validation and serialization."""
+        return core_schema.no_info_before_validator_function(
             cls._validate,
             core_schema.dict_schema(
                 keys_schema=core_schema.str_schema(),
                 values_schema=core_schema.any_schema(),
+            ),
+            serialization=core_schema.plain_serializer_function_ser_schema(
+                cls._serialize,
+                return_schema=core_schema.dict_schema(
+                    keys_schema=core_schema.str_schema(),
+                    values_schema=core_schema.any_schema(),
+                ),
             ),
         )
 
@@ -104,3 +111,8 @@ class CaseInsensitiveDict[_KT, _VT](MutableMapping[_KT, _VT]):
         if isinstance(value, dict):
             return cls(value)
         raise TypeError(f"Expected dict or CaseInsensitiveDict, got {type(value)}")
+
+    @classmethod
+    def _serialize(cls, value: "CaseInsensitiveDict") -> dict[str, Any]:
+        """Serialize CaseInsensitiveDict to regular dict for Pydantic."""
+        return dict(value.items())

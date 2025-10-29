@@ -354,3 +354,25 @@ class TestCaseInsensitiveDict:
         assert "CamelCase" in keys
         assert "UPPER" in keys
         assert "lower" in keys
+
+    def test_pydantic_serialization(self):
+        """Test Pydantic serialization works without warnings."""
+        from pydantic import BaseModel
+
+        class TestModel(BaseModel):
+            data: CaseInsensitiveDict[str, str]
+
+        # Create test data
+        test_dict = CaseInsensitiveDict({"Key1": "value1", "KEY2": "value2"})
+        model = TestModel(data=test_dict)
+
+        # Test serialization
+        serialized = model.model_dump()
+        assert isinstance(serialized["data"], dict)
+        assert serialized["data"]["Key1"] == "value1"
+        assert serialized["data"]["KEY2"] == "value2"
+
+        # Test JSON serialization
+        json_str = model.model_dump_json()
+        assert "Key1" in json_str
+        assert "value1" in json_str
