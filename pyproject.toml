@@ -21,7 +21,7 @@ dependencies = [
 description = "I/O and models in type-annotated Python for NGS sample sheets: Illumina and Aviti"
 keywords = []
 name = "elsheeto"
-version = "0.2.0"
+version = "0.2.1"
 readme = "README.md"
 requires-python = ">=3.13"
 
