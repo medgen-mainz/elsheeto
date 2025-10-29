@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/medgen-mainz/elsheeto/compare/elsheeto-v0.1.0...elsheeto-v0.2.0) (2025-10-29)
+
+
+### Features
+
+* allow missing CSV cells by config ([#18](https://github.com/medgen-mainz/elsheeto/issues/18)) ([#19](https://github.com/medgen-mainz/elsheeto/issues/19)) ([b2cb684](https://github.com/medgen-mainz/elsheeto/commit/b2cb684690b5d602dc52824134ac0972ca73dba7))
+
 ## [0.1.0](https://github.com/medgen-mainz/elsheeto/compare/elsheeto-v0.14.2...elsheeto-v0.1.0) (2025-10-29)
 
 
