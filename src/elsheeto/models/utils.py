@@ -1,77 +1,81 @@
-from typing import Any
+from collections import abc
+from typing import (
+    Any,
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    overload,
+)
 
 from pydantic import GetCoreSchemaHandler
 from pydantic_core import core_schema
 
 
-class CaseInsensitiveDict(dict[str, Any]):
+class CaseInsensitiveDict[KT, VT](MutableMapping[KT, VT]):
     """A case-insensitive dictionary that preserves original key casing."""
 
-    def __init__(self, data: dict[str, Any] | None = None) -> None:
-        """Initialize with optional data."""
-        super().__init__()
-        self._keys: dict[str, str] = {}  # lowercase -> original case mapping
-        if data:
-            self.update(data)
+    @overload
+    def __init__(self, data: Mapping[KT, VT] | None = None) -> None: ...
 
-    def __setitem__(self, key: str, value: Any) -> None:
-        """Set item with case-insensitive key."""
-        lower_key = key.lower()
-        if lower_key in self._keys:
-            # Remove old entry with different casing
-            super().__delitem__(self._keys[lower_key])
-        self._keys[lower_key] = key
-        super().__setitem__(key, value)
+    @overload
+    def __init__(self, data: Iterable[tuple[KT, VT]] | None = None) -> None: ...
 
-    def __getitem__(self, key: str) -> Any:
-        """Get item with case-insensitive key."""
-        lower_key = key.lower()
-        if lower_key in self._keys:
-            return super().__getitem__(self._keys[lower_key])
-        raise KeyError(key)
+    def __init__(self, data: Mapping[KT, VT] | Iterable[tuple[KT, VT]] | None = None) -> None:
+        # Mapping from lowercased key to tuple of (actual key, value)
+        self._data: dict[KT, tuple[KT, VT]] = {}
+        if data is None:
+            data = {}
+        self.update(data)
 
-    def __delitem__(self, key: str) -> None:
-        """Delete item with case-insensitive key."""
-        lower_key = key.lower()
-        if lower_key in self._keys:
-            original_key = self._keys[lower_key]
-            del self._keys[lower_key]
-            super().__delitem__(original_key)
-        else:
-            raise KeyError(key)
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({dict(self.items())!r})"
 
-    def __contains__(self, key: object) -> bool:
-        """Check if key exists (case-insensitive)."""
+    @staticmethod
+    def _convert_key(key: KT) -> KT:
         if isinstance(key, str):
-            return key.lower() in self._keys
-        return False
+            return key.lower()  # type: ignore[return-value]
+        return key
 
-    def get(self, key: str, default: Any = None) -> Any:
-        """Get item with case-insensitive key, return default if not found."""
+    def _get_key_value(self, key: KT) -> tuple[KT, VT]:
         try:
-            return self[key]
+            return self._data[self._convert_key(key=key)]
         except KeyError:
-            return default
+            raise KeyError(f"Key: {key!r} not found.") from None
 
-    def update(self, other: dict[str, Any] | None = None, **kwargs: Any) -> None:
-        """Update with another dictionary."""
-        if other is not None:
-            for key, value in other.items():
-                self[key] = value
-        for key, value in kwargs.items():
-            self[key] = value
+    def __setitem__(self, key: KT, value: VT) -> None:
+        self._data[self._convert_key(key=key)] = (key, value)
 
-    def keys(self):  # type: ignore[override]
-        """Return original case keys."""
-        return super().keys()
+    def __getitem__(self, key: KT) -> VT:
+        return self._get_key_value(key=key)[1]
 
-    def items(self):  # type: ignore[override]
-        """Return items with original case keys."""
-        return super().items()
+    def __delitem__(self, key: KT) -> None:
+        del self._data[self._convert_key(key=key)]
 
-    def values(self):  # type: ignore[override]
-        """Return values."""
-        return super().values()
+    def __iter__(self) -> Iterator[KT]:
+        return (key for key, _ in self._data.values())
+
+    def __len__(self) -> int:
+        return len(self._data)
+
+    def lower_items(self) -> Iterator[tuple[KT, VT]]:
+        return ((key, val[1]) for key, val in self._data.items())
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, abc.Mapping):
+            return False
+        other_dict = CaseInsensitiveDict[Any, Any](data=other)
+        return dict(self.lower_items()) == dict(other_dict.lower_items())
+
+    def copy(self) -> "CaseInsensitiveDict[KT, VT]":
+        return CaseInsensitiveDict(data=dict(self._data.values()))
+
+    def getkey(self, key: KT) -> KT:
+        return self._get_key_value(key=key)[0]
+
+    @classmethod
+    def fromkeys(cls, iterable: Iterable[KT], value: VT) -> "CaseInsensitiveDict[KT, VT]":
+        return cls([(key, value) for key in iterable])
 
     @classmethod
     def __get_pydantic_core_schema__(cls, source_type: Any, handler: GetCoreSchemaHandler) -> core_schema.CoreSchema:

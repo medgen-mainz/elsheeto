@@ -40,7 +40,7 @@ class IlluminaHeader(BaseModel):
     run: Annotated[str | None, Field(default=None)]
 
     #: Optional extra metadata for fields not explicitly defined.
-    extra_metadata: Annotated[CaseInsensitiveDict, Field(default_factory=lambda: CaseInsensitiveDict({}))]
+    extra_metadata: Annotated[CaseInsensitiveDict, Field(default_factory=CaseInsensitiveDict)]
 
     #: Model configuration.
     model_config = ConfigDict(frozen=True)
@@ -67,7 +67,7 @@ class IlluminaSettings(BaseModel):
     data: CaseInsensitiveDict
 
     #: Optional extra metadata.
-    extra_metadata: Annotated[CaseInsensitiveDict, Field(default_factory=lambda: CaseInsensitiveDict({}))]
+    extra_metadata: Annotated[CaseInsensitiveDict, Field(default_factory=CaseInsensitiveDict)]
 
     #: Model configuration.
     model_config = ConfigDict(frozen=True)
@@ -104,7 +104,7 @@ class IlluminaSample(BaseModel):
     description: Annotated[str | None, Field(default=None)]
 
     #: Optional extra metadata for fields not explicitly defined.
-    extra_metadata: Annotated[CaseInsensitiveDict, Field(default_factory=lambda: CaseInsensitiveDict({}))]
+    extra_metadata: Annotated[CaseInsensitiveDict, Field(default_factory=CaseInsensitiveDict)]
 
     #: Model configuration.
     model_config = ConfigDict(frozen=True)

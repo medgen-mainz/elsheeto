@@ -27,7 +27,7 @@ class AvitiSample(BaseModel):
     description: str | None = None
 
     #: Optional extra metadata for unknown fields.
-    extra_metadata: CaseInsensitiveDict = Field(default_factory=lambda: CaseInsensitiveDict({}))
+    extra_metadata: CaseInsensitiveDict = Field(default_factory=CaseInsensitiveDict)
 
     #: Model configuration.
     model_config = ConfigDict(frozen=True)
@@ -96,9 +96,9 @@ class AvitiRunValues(BaseModel):
     """Representation of the `RunValues` section of an Aviti sample sheet."""
 
     #: Key-value pairs from the RunValues section.
-    data: CaseInsensitiveDict = Field(default_factory=lambda: CaseInsensitiveDict({}))
+    data: CaseInsensitiveDict = Field(default_factory=CaseInsensitiveDict)
     #: Optional extra metadata.
-    extra_metadata: CaseInsensitiveDict = Field(default_factory=lambda: CaseInsensitiveDict({}))
+    extra_metadata: CaseInsensitiveDict = Field(default_factory=CaseInsensitiveDict)
 
     model_config = ConfigDict(frozen=True)
 
@@ -186,7 +186,7 @@ class AvitiSettings(BaseModel):
     #: Collection of setting entries (may include lane-specific settings).
     settings: AvitiSettingEntries = Field(default_factory=AvitiSettingEntries)
     #: Optional extra metadata.
-    extra_metadata: CaseInsensitiveDict = Field(default_factory=lambda: CaseInsensitiveDict({}))
+    extra_metadata: CaseInsensitiveDict = Field(default_factory=CaseInsensitiveDict)
 
     model_config = ConfigDict(frozen=True)
 

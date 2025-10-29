@@ -8,6 +8,7 @@ from elsheeto.facade import (
     parse_illumina_v1,
     parse_illumina_v1_from_data,
 )
+from elsheeto.models.utils import CaseInsensitiveDict
 from elsheeto.parser.common import (
     CaseConsistency,
     ColumnConsistency,
@@ -23,7 +24,8 @@ __all__ = [
     "parse_illumina_v1",
     "parse_illumina_v1_from_data",
     "ParserConfiguration",
-    "CsvDelimiter",
     "CaseConsistency",
+    "CaseInsensitiveDict",
     "ColumnConsistency",
+    "CsvDelimiter",
 ]
