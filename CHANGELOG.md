@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/medgen-mainz/elsheeto/compare/elsheeto-v0.2.0...elsheeto-v0.2.1) (2025-10-29)
+
+
+### Miscellaneous Chores
+
+* update badges ([#21](https://github.com/medgen-mainz/elsheeto/issues/21)) ([8072f6c](https://github.com/medgen-mainz/elsheeto/commit/8072f6c452afc8d5ccef0d66456cc7a644c67f42))
+
 ## [0.2.0](https://github.com/medgen-mainz/elsheeto/compare/elsheeto-v0.1.0...elsheeto-v0.2.0) (2025-10-29)
 
 
