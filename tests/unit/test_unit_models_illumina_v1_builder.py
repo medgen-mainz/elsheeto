@@ -499,3 +499,101 @@ class TestIlluminaSheetBuilderErrorCases:
         built_sheet = result.build()
         assert built_sheet.header.extra_metadata["UnknownField"] == "UnknownValue"
         assert result is builder  # Should return self for chaining
+
+    def test_set_header_field_snake_case_conversion(self):
+        """Test setting header field that requires snake_case conversion - covers line 692."""
+        builder = IlluminaSheetBuilder()
+
+        result = builder.set_header_field("Instrument Type", "TestInstrument")
+
+        built_sheet = result.build()
+
+        assert built_sheet.header.instrument_type == "TestInstrument"
+        assert result is builder
+
+    def test_add_settings_multiple(self):
+        """Test adding multiple settings at once - covers lines 783-784."""
+        builder = IlluminaSheetBuilder()
+
+        settings = {"Setting1": "Value1", "Setting2": "Value2"}
+        result = builder.add_settings(settings)
+
+        built_sheet = result.build()
+        assert built_sheet.settings is not None
+        assert built_sheet.settings.data["Setting1"] == "Value1"
+        assert built_sheet.settings.data["Setting2"] == "Value2"
+        assert result is builder
+
+    def test_remove_setting(self):
+        """Test removing a setting - covers lines 816-817."""
+        builder = IlluminaSheetBuilder()
+        builder.add_setting("ToRemove", "Value")
+        builder.add_setting("ToKeep", "Value")
+
+        result = builder.remove_setting("ToRemove")
+
+        built_sheet = result.build()
+        assert built_sheet.settings is not None
+        assert "ToRemove" not in built_sheet.settings.data
+        assert built_sheet.settings.data["ToKeep"] == "Value"
+        assert result is builder
+
+    def test_clear_settings(self):
+        """Test clearing all settings - covers lines 825-827."""
+        builder = IlluminaSheetBuilder()
+        builder.add_setting("Setting1", "Value1")
+        builder.add_setting("Setting2", "Value2")
+
+        result = builder.clear_settings()
+
+        built_sheet = result.build()
+        # When settings are cleared, settings section becomes None
+        assert built_sheet.settings is None
+        assert result is builder
+
+    def test_set_header_fields_dict(self):
+        """Test set_header_fields method - covers lines 715-717."""
+        builder = IlluminaSheetBuilder()
+
+        fields = {"experiment_name": "TestExp", "investigator_name": "TestInv"}
+        result = builder.set_header_fields(fields)
+
+        built_sheet = result.build()
+        assert built_sheet.header is not None
+        assert built_sheet.header.experiment_name == "TestExp"
+        assert built_sheet.header.investigator_name == "TestInv"
+        assert result is builder
+
+    def test_clear_header_fields_method(self):
+        """Test clear_header_fields method - covers lines 725-726."""
+        builder = IlluminaSheetBuilder()
+        builder.set_header_field("experiment_name", "Test")
+
+        result = builder.clear_header_fields()
+
+        built_sheet = result.build()
+        assert built_sheet.header.experiment_name is None
+        assert result is builder
+
+    def test_add_read_length_method(self):
+        """Test add_read_length method - covers lines 749-750."""
+        builder = IlluminaSheetBuilder()
+        builder.set_read_lengths([150])
+
+        result = builder.add_read_length(75)
+
+        built_sheet = result.build()
+        assert built_sheet.reads is not None
+        assert built_sheet.reads.read_lengths == [150, 75]
+        assert result is builder
+
+    def test_clear_read_lengths_method(self):
+        """Test clear_read_lengths method - covers lines 758-759."""
+        builder = IlluminaSheetBuilder()
+        builder.set_read_lengths([150, 75])
+
+        result = builder.clear_read_lengths()
+
+        built_sheet = result.build()
+        assert built_sheet.reads is None  # Becomes None when empty
+        assert result is builder

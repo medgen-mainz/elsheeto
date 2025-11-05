@@ -3,7 +3,7 @@
 The Stage 2 results are converted into these models in Stage 3.
 """
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Mapping
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -406,7 +406,7 @@ class AvitiSheet(BaseModel):
 
         return self.model_copy(update={"run_values": new_run_values})
 
-    def with_run_values_updated(self, values: dict[str, str]) -> "AvitiSheet":
+    def with_run_values_updated(self, values: Mapping[str, str]) -> "AvitiSheet":
         """Create a new sheet with multiple run values added or updated.
 
         Args:
@@ -662,7 +662,7 @@ class AvitiSheetBuilder:
         self._run_values[key] = value
         return self
 
-    def add_run_values(self, values: dict[str, str]) -> "AvitiSheetBuilder":
+    def add_run_values(self, values: Mapping[str, str]) -> "AvitiSheetBuilder":
         """Add or update multiple run values.
 
         Args:

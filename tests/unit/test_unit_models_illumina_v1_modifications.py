@@ -340,3 +340,23 @@ class TestIlluminaSampleSheetErrorCases:
 
         assert result.settings is not None
         assert result.settings.data["NewSetting"] == "NewValue"
+
+    def test_with_settings_field_when_settings_exist(self):
+        """Test updating settings field when settings section already exists - covers lines 398-400."""
+        # Create a sheet with existing settings using Pydantic v2 constructor
+        sheet = IlluminaSampleSheet(
+            header=IlluminaHeader(experiment_name="Test"),
+            reads=IlluminaReads(read_lengths=[150]),
+            settings=IlluminaSettings(
+                data=CaseInsensitiveDict({"ExistingSetting": "ExistingValue"}), extra_metadata=CaseInsensitiveDict()
+            ),
+            data=[IlluminaSample(sample_id="S1", sample_name="Sample1", index="AAAA")],
+        )
+
+        # This should hit the else branch (lines 398-400) since settings is not None
+        result = sheet.with_setting_added("NewSetting", "NewValue")
+
+        assert result.settings is not None
+        assert result.settings.data["ExistingSetting"] == "ExistingValue"  # Preserve existing
+        assert result.settings.data["NewSetting"] == "NewValue"  # Add new
+        assert len(result.settings.data) == 2

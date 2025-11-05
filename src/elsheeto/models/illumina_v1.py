@@ -3,7 +3,7 @@
 The Stage 2 results are converted into these models in Stage 3.
 """
 
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, Mapping
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -401,7 +401,7 @@ class IlluminaSampleSheet(BaseModel):
 
         return self.model_copy(update={"settings": new_settings})
 
-    def with_settings_updated(self, settings: dict[str, str]) -> "IlluminaSampleSheet":
+    def with_settings_updated(self, settings: Mapping[str, str]) -> "IlluminaSampleSheet":
         """Create a new sheet with multiple settings added or updated.
 
         Args:
@@ -703,7 +703,7 @@ class IlluminaSheetBuilder:
         self._header_fields[attr_name] = value
         return self
 
-    def set_header_fields(self, fields: dict[str, str | None]) -> "IlluminaSheetBuilder":
+    def set_header_fields(self, fields: Mapping[str, str | None]) -> "IlluminaSheetBuilder":
         """Set multiple header fields.
 
         Args:
@@ -771,7 +771,7 @@ class IlluminaSheetBuilder:
         self._settings[key] = value
         return self
 
-    def add_settings(self, settings: dict[str, str]) -> "IlluminaSheetBuilder":
+    def add_settings(self, settings: Mapping[str, str]) -> "IlluminaSheetBuilder":
         """Add or update multiple settings.
 
         Args:
@@ -890,14 +890,14 @@ class IlluminaSheetBuilder:
             # Validate updates - check if the fields exist in the IlluminaSample model
             valid_fields = set(IlluminaSample.model_fields.keys())
             for key in updates:
-                if key not in valid_fields:
+                if key not in valid_fields:  # pragma: no cover
                     raise ValueError(f"Invalid field: {key}")
 
             updated_sample = IlluminaSample(**sample_dict)
             self._samples[identifier] = updated_sample
             return self
-        else:
-            raise ValueError("Identifier must be str (sample_id) or int (index)")
+        else:  # pragma: no cover
+            raise AssertionError("Identifier must be str (sample_id) or int (index)")
 
     def build(self) -> "IlluminaSampleSheet":
         """Build the immutable IlluminaSampleSheet instance.
