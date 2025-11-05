@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/medgen-mainz/elsheeto/compare/elsheeto-v0.2.2...elsheeto-v0.3.0) (2025-11-05)
+
+
+### Features
+
+* add modifying and writing of sheets ([#25](https://github.com/medgen-mainz/elsheeto/issues/25),[#26](https://github.com/medgen-mainz/elsheeto/issues/26)) ([#27](https://github.com/medgen-mainz/elsheeto/issues/27)) ([552530a](https://github.com/medgen-mainz/elsheeto/commit/552530a3c080a299b264b9649ab5f86f743f7433))
+
 ## [0.2.2](https://github.com/medgen-mainz/elsheeto/compare/elsheeto-v0.2.1...elsheeto-v0.2.2) (2025-10-29)
 
 
