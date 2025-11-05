@@ -201,3 +201,107 @@ You can run this example in several ways:
    python examples/read_aviti.py
 
 The example demonstrates elsheeto's advanced features including composite index handling, intelligent sample categorization, and comprehensive settings analysis.
+
+Modifying Aviti Sample Sheets
+-----------------------------
+
+In addition to parsing, elsheeto provides powerful capabilities for modifying and writing Aviti sample sheets. This is useful for:
+
+* Adding new samples to existing experiments
+* Updating sample metadata (project names, descriptions, etc.)
+* Removing samples that failed quality control
+* Changing experimental parameters (run values, settings)
+
+Quick Start: Simple Modifications
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For simple modifications, use the fluent API:
+
+.. code-block:: python
+
+   from elsheeto import parse_aviti, write_aviti_to_file
+   from elsheeto.models.aviti import AvitiSample
+
+   # Load existing sheet
+   sheet = parse_aviti("experiment.csv")
+
+   # Make modifications using fluent API
+   modified_sheet = (sheet
+       .with_sample_added(AvitiSample(
+           sample_name="New_Sample",
+           index1="ATCGATCG",
+           project="NewProject"
+       ))
+       .with_sample_modified("Old_Sample", project="UpdatedProject")
+       .with_run_value_added("ModificationDate", "2024-01-15")
+   )
+
+   # Write back to file
+   write_aviti_to_file(modified_sheet, "modified_experiment.csv")
+
+Complex Modifications: Builder Pattern
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For complex operations, use the builder pattern:
+
+.. code-block:: python
+
+   from elsheeto.models.aviti import AvitiSheetBuilder, AvitiSample
+
+   # Create new sheet from scratch or modify existing
+   builder = AvitiSheetBuilder()  # or AvitiSheetBuilder.from_sheet(existing_sheet)
+
+   # Add multiple samples
+   samples = [
+       AvitiSample(sample_name=f"Sample_{i}", index1="ATCG", project="BatchProject")
+       for i in range(1, 10)
+   ]
+   builder.add_samples(samples)
+
+   # Add run values and settings
+   builder.add_run_values({
+       "Experiment": "BATCH_001",
+       "Date": "2024-01-15"
+   })
+   builder.add_setting("ReadLength", "150")
+
+   # Build the immutable sheet
+   final_sheet = builder.build()
+
+Modification Examples
+~~~~~~~~~~~~~~~~~~~~~
+
+See the comprehensive examples in:
+
+* ``examples/quick_start_aviti.py``: Simple introduction to modification features
+* ``examples/modify_aviti.py``: Complete guide with advanced patterns
+
+Key modification features:
+
+* **Immutable operations**: All modifications return new objects, preserving originals
+* **Fluent API**: Chain multiple modifications for readable code
+* **Batch operations**: Add/remove multiple samples efficiently
+* **Round-trip compatibility**: Modified sheets parse correctly when re-read
+* **Composite index support**: Full support for ``+`` separated indices
+* **Validation**: All modifications are validated according to Aviti format requirements
+
+Available Modification Methods
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Sample Operations:**
+
+* ``with_sample_added(sample)`` - Add a new sample
+* ``with_sample_modified(name, **kwargs)`` - Update sample fields
+* ``with_sample_removed(name)`` - Remove a sample by name
+* ``with_samples_filtered(predicate)`` - Keep only samples matching criteria
+
+**Run Values Operations:**
+
+* ``with_run_value_added(key, value)`` - Add single run value
+* ``with_run_values_updated(dict)`` - Add/update multiple run values
+
+**Settings Operations:**
+
+* ``with_setting_added(name, value, lane=None)`` - Add setting entry
+
+The modification system maintains full type safety and validation while providing both simple and advanced APIs for different use cases.

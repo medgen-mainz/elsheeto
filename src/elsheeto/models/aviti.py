@@ -3,9 +3,14 @@
 The Stage 2 results are converted into these models in Stage 3.
 """
 
+from typing import TYPE_CHECKING, Mapping
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from elsheeto.models.utils import CaseInsensitiveDict
+
+if TYPE_CHECKING:
+    from elsheeto.writer.base import WriterConfiguration
 
 
 class AvitiSample(BaseModel):
@@ -262,3 +267,525 @@ class AvitiSheet(BaseModel):
     samples: list[AvitiSample]
 
     model_config = ConfigDict(frozen=True)
+
+    def with_sample_added(self, sample: AvitiSample) -> "AvitiSheet":
+        """Create a new sheet with an additional sample.
+
+        Args:
+            sample: The sample to add.
+
+        Returns:
+            A new AvitiSheet with the sample added.
+
+        Example:
+            >>> from elsheeto.models.aviti import AvitiSample, AvitiSheet
+            >>> sheet = AvitiSheet(samples=[])
+            >>> new_sample = AvitiSample(sample_name="Test", index1="ATCG")
+            >>> modified_sheet = sheet.with_sample_added(new_sample)
+            >>> len(modified_sheet.samples)
+            1
+        """
+        new_samples = self.samples + [sample]
+        return self.model_copy(update={"samples": new_samples})
+
+    def with_sample_removed(self, sample_name: str) -> "AvitiSheet":
+        """Create a new sheet with a sample removed by name.
+
+        Args:
+            sample_name: The name of the sample to remove.
+
+        Returns:
+            A new AvitiSheet with the sample removed.
+
+        Raises:
+            ValueError: If no sample with the given name is found.
+
+        Example:
+            >>> from elsheeto.models.aviti import AvitiSample, AvitiSheet
+            >>> sample = AvitiSample(sample_name="OldSample", index1="ATCG")
+            >>> sheet = AvitiSheet(samples=[sample])
+            >>> modified_sheet = sheet.with_sample_removed("OldSample")
+            >>> len(modified_sheet.samples)
+            0
+        """
+        new_samples = []
+        found = False
+        for sample in self.samples:
+            if sample.sample_name == sample_name:
+                found = True
+            else:
+                new_samples.append(sample)
+
+        if not found:
+            raise ValueError(f"No sample found with name: {sample_name}")
+
+        return self.model_copy(update={"samples": new_samples})
+
+    def with_sample_modified(self, sample_name: str, **updates) -> "AvitiSheet":
+        """Create a new sheet with a sample modified by name.
+
+        Args:
+            sample_name: The name of the sample to modify.
+            **updates: Fields to update on the sample.
+
+        Returns:
+            A new AvitiSheet with the sample modified.
+
+        Raises:
+            ValueError: If no sample with the given name is found.
+
+        Example:
+            >>> from elsheeto.models.aviti import AvitiSample, AvitiSheet
+            >>> sample = AvitiSample(sample_name="Sample1", index1="ATCG")
+            >>> sheet = AvitiSheet(samples=[sample])
+            >>> modified_sheet = sheet.with_sample_modified("Sample1", project="NewProject")
+            >>> modified_sheet.samples[0].project
+            'NewProject'
+        """
+        new_samples = []
+        found = False
+        for sample in self.samples:
+            if sample.sample_name == sample_name:
+                found = True
+                new_samples.append(sample.model_copy(update=updates))
+            else:
+                new_samples.append(sample)
+
+        if not found:
+            raise ValueError(f"No sample found with name: {sample_name}")
+
+        return self.model_copy(update={"samples": new_samples})
+
+    def with_samples_filtered(self, predicate) -> "AvitiSheet":
+        """Create a new sheet with samples filtered by a predicate function.
+
+        Args:
+            predicate: A function that takes an AvitiSample and returns bool.
+
+        Returns:
+            A new AvitiSheet with filtered samples.
+
+        Example:
+            >>> from elsheeto.models.aviti import AvitiSample, AvitiSheet
+            >>> samples = [AvitiSample(sample_name="S1", index1="ATCG", project="MyProject"),
+            ...            AvitiSample(sample_name="S2", index1="GCTA", project="OtherProject")]
+            >>> sheet = AvitiSheet(samples=samples)
+            >>> # Keep only samples from a specific project
+            >>> modified_sheet = sheet.with_samples_filtered(
+            ...     lambda s: s.project == "MyProject"
+            ... )
+            >>> len(modified_sheet.samples)
+            1
+        """
+        new_samples = [sample for sample in self.samples if predicate(sample)]
+        return self.model_copy(update={"samples": new_samples})
+
+    def with_run_value_added(self, key: str, value: str) -> "AvitiSheet":
+        """Create a new sheet with a run value added or updated.
+
+        Args:
+            key: The run value key.
+            value: The run value.
+
+        Returns:
+            A new AvitiSheet with the run value added/updated.
+
+        Example:
+            >>> from elsheeto.models.aviti import AvitiSheet
+            >>> sheet = AvitiSheet(samples=[])
+            >>> modified_sheet = sheet.with_run_value_added("Experiment", "Test123")
+            >>> modified_sheet.run_values.data["Experiment"] # doctest: +SKIP
+            'Test123'
+        """
+        if self.run_values is None:
+            new_run_values = AvitiRunValues(data=CaseInsensitiveDict({key: value}))
+        else:
+            new_data = CaseInsensitiveDict(self.run_values.data)
+            new_data[key] = value
+            new_run_values = self.run_values.model_copy(update={"data": new_data})
+
+        return self.model_copy(update={"run_values": new_run_values})
+
+    def with_run_values_updated(self, values: Mapping[str, str]) -> "AvitiSheet":
+        """Create a new sheet with multiple run values added or updated.
+
+        Args:
+            values: Dictionary of key-value pairs to add/update.
+
+        Returns:
+            A new AvitiSheet with the run values added/updated.
+
+        Example:
+            >>> from elsheeto.models.aviti import AvitiSheet
+            >>> sheet = AvitiSheet(samples=[])
+            >>> modified_sheet = sheet.with_run_values_updated({
+            ...     "Experiment": "Test123",
+            ...     "Date": "2024-01-01"
+            ... })
+            >>> len(modified_sheet.run_values.data) # doctest: +SKIP
+            2
+        """
+        if self.run_values is None:
+            new_run_values = AvitiRunValues(data=CaseInsensitiveDict(values))
+        else:
+            new_data = CaseInsensitiveDict(self.run_values.data)
+            new_data.update(values)
+            new_run_values = self.run_values.model_copy(update={"data": new_data})
+
+        return self.model_copy(update={"run_values": new_run_values})
+
+    def with_setting_added(self, name: str, value: str, lane: str | None = None) -> "AvitiSheet":
+        """Create a new sheet with a setting added.
+
+        Args:
+            name: The setting name.
+            value: The setting value.
+            lane: Optional lane specification.
+
+        Returns:
+            A new AvitiSheet with the setting added.
+
+        Example:
+            >>> from elsheeto.models.aviti import AvitiSheet
+            >>> sheet = AvitiSheet(samples=[])
+            >>> modified_sheet = sheet.with_setting_added("ReadLength", "150", "1+2")
+            >>> setting = modified_sheet.settings.settings.get_by_key_and_lane("ReadLength", "1+2") # doctest: +SKIP
+            >>> setting.value # doctest: +SKIP
+            '150'
+        """
+        new_entry = AvitiSettingEntry(name=name, value=value, lane=lane)
+
+        if self.settings is None:
+            new_settings = AvitiSettings(settings=AvitiSettingEntries(entries=[new_entry]))
+        else:
+            new_entries = self.settings.settings.entries + [new_entry]
+            new_setting_entries = AvitiSettingEntries(entries=new_entries)
+            new_settings = self.settings.model_copy(update={"settings": new_setting_entries})
+
+        return self.model_copy(update={"settings": new_settings})
+
+    def to_csv(self, config: "WriterConfiguration | None" = None) -> str:
+        """Export the sheet to CSV format.
+
+        Args:
+            config: Optional writer configuration. If None, default configuration is used.
+
+        Returns:
+            The sheet in CSV format as a string.
+
+        Example:
+            >>> from elsheeto.models.aviti import AvitiSheet
+            >>> sheet = AvitiSheet(samples=[])
+            >>> csv_content = sheet.to_csv()
+            >>> "[Samples]" in csv_content
+            True
+        """
+        from elsheeto.writer.aviti import AvitiCsvWriter
+        from elsheeto.writer.base import WriterConfiguration
+
+        writer = AvitiCsvWriter(config or WriterConfiguration())
+        return writer.write_to_string(self)
+
+
+class AvitiSheetBuilder:
+    """Mutable builder for constructing AvitiSheet instances.
+
+    This builder provides a fluent API for complex modifications while maintaining
+    type safety and validation. The builder is mutable during construction but
+    produces immutable AvitiSheet instances.
+
+    Examples:
+        Create a new sheet from scratch:
+
+        >>> builder = AvitiSheetBuilder()
+        >>> sheet = (builder
+        ...     .add_sample(AvitiSample(sample_name="Sample1", index1="ATCG"))
+        ...     .add_run_value("Experiment", "Test")
+        ...     .build())
+
+        Modify an existing sheet:
+
+        >>> from elsheeto.models.aviti import AvitiSample, AvitiSheet
+        >>> existing_sheet = AvitiSheet(samples=[AvitiSample(sample_name="Old", index1="AAAA")])
+        >>> builder = AvitiSheetBuilder.from_sheet(existing_sheet)
+        >>> modified = (builder
+        ...     .remove_sample_by_name("Old")
+        ...     .add_sample(AvitiSample(sample_name="NewSample", index1="GCTA"))
+        ...     .build())
+    """
+
+    def __init__(self) -> None:
+        """Initialize an empty builder."""
+        self._samples: list[AvitiSample] = []
+        self._run_values: dict[str, str] = {}
+        self._run_values_extra: dict[str, str] = {}
+        self._settings_entries: list[AvitiSettingEntry] = []
+        self._settings_extra: dict[str, str] = {}
+
+    @classmethod
+    def from_sheet(cls, sheet: "AvitiSheet") -> "AvitiSheetBuilder":
+        """Create a builder initialized with data from an existing sheet.
+
+        Args:
+            sheet: The existing AvitiSheet to copy data from.
+
+        Returns:
+            A new builder containing the sheet's data.
+        """
+        builder = cls()
+
+        # Copy samples
+        builder._samples = list(sheet.samples)
+
+        # Copy run values
+        if sheet.run_values:
+            builder._run_values = dict(sheet.run_values.data.items())
+            builder._run_values_extra = dict(sheet.run_values.extra_metadata.items())
+
+        # Copy settings
+        if sheet.settings:
+            builder._settings_entries = list(sheet.settings.settings.entries)
+            builder._settings_extra = dict(sheet.settings.extra_metadata.items())
+
+        return builder
+
+    def add_sample(self, sample: AvitiSample) -> "AvitiSheetBuilder":
+        """Add a sample to the sheet.
+
+        Args:
+            sample: The sample to add.
+
+        Returns:
+            This builder for method chaining.
+        """
+        self._samples.append(sample)
+        return self
+
+    def add_samples(self, samples: list[AvitiSample]) -> "AvitiSheetBuilder":
+        """Add multiple samples to the sheet.
+
+        Args:
+            samples: The samples to add.
+
+        Returns:
+            This builder for method chaining.
+        """
+        self._samples.extend(samples)
+        return self
+
+    def remove_sample(self, sample: AvitiSample) -> "AvitiSheetBuilder":
+        """Remove a sample from the sheet.
+
+        Args:
+            sample: The sample to remove.
+
+        Returns:
+            This builder for method chaining.
+
+        Raises:
+            ValueError: If the sample is not found.
+        """
+        try:
+            self._samples.remove(sample)
+        except ValueError:
+            raise ValueError(f"Sample not found: {sample}")
+        return self
+
+    def remove_sample_by_name(self, sample_name: str) -> "AvitiSheetBuilder":
+        """Remove a sample by its name.
+
+        Args:
+            sample_name: The name of the sample to remove.
+
+        Returns:
+            This builder for method chaining.
+
+        Raises:
+            ValueError: If no sample with the given name is found.
+        """
+        for i, sample in enumerate(self._samples):
+            if sample.sample_name == sample_name:
+                del self._samples[i]
+                return self
+        raise ValueError(f"No sample found with name: {sample_name}")
+
+    def remove_samples_by_project(self, project: str) -> "AvitiSheetBuilder":
+        """Remove all samples with the specified project.
+
+        Args:
+            project: The project name to match.
+
+        Returns:
+            This builder for method chaining.
+        """
+        self._samples = [s for s in self._samples if s.project != project]
+        return self
+
+    def update_sample_by_name(self, sample_name: str, **updates) -> "AvitiSheetBuilder":
+        """Update a sample by its name.
+
+        Args:
+            sample_name: The name of the sample to update.
+            **updates: Fields to update on the sample.
+
+        Returns:
+            This builder for method chaining.
+
+        Raises:
+            ValueError: If no sample with the given name is found.
+        """
+        for i, sample in enumerate(self._samples):
+            if sample.sample_name == sample_name:
+                self._samples[i] = sample.model_copy(update=updates)
+                return self
+        raise ValueError(f"No sample found with name: {sample_name}")
+
+    def clear_samples(self) -> "AvitiSheetBuilder":
+        """Remove all samples from the sheet.
+
+        Returns:
+            This builder for method chaining.
+        """
+        self._samples.clear()
+        return self
+
+    def add_run_value(self, key: str, value: str) -> "AvitiSheetBuilder":
+        """Add or update a run value.
+
+        Args:
+            key: The run value key.
+            value: The run value.
+
+        Returns:
+            This builder for method chaining.
+        """
+        self._run_values[key] = value
+        return self
+
+    def add_run_values(self, values: Mapping[str, str]) -> "AvitiSheetBuilder":
+        """Add or update multiple run values.
+
+        Args:
+            values: Dictionary of key-value pairs to add.
+
+        Returns:
+            This builder for method chaining.
+        """
+        self._run_values.update(values)
+        return self
+
+    def remove_run_value(self, key: str) -> "AvitiSheetBuilder":
+        """Remove a run value.
+
+        Args:
+            key: The key to remove.
+
+        Returns:
+            This builder for method chaining.
+
+        Raises:
+            KeyError: If the key is not found.
+        """
+        del self._run_values[key]
+        return self
+
+    def clear_run_values(self) -> "AvitiSheetBuilder":
+        """Remove all run values.
+
+        Returns:
+            This builder for method chaining.
+        """
+        self._run_values.clear()
+        self._run_values_extra.clear()
+        return self
+
+    def add_setting(self, name: str, value: str, lane: str | None = None) -> "AvitiSheetBuilder":
+        """Add a setting entry.
+
+        Args:
+            name: The setting name.
+            value: The setting value.
+            lane: Optional lane specification.
+
+        Returns:
+            This builder for method chaining.
+        """
+        entry = AvitiSettingEntry(name=name, value=value, lane=lane)
+        self._settings_entries.append(entry)
+        return self
+
+    def add_settings(self, settings: list[AvitiSettingEntry]) -> "AvitiSheetBuilder":
+        """Add multiple setting entries.
+
+        Args:
+            settings: List of setting entries to add.
+
+        Returns:
+            This builder for method chaining.
+        """
+        self._settings_entries.extend(settings)
+        return self
+
+    def remove_settings_by_name(self, name: str) -> "AvitiSheetBuilder":
+        """Remove all settings with the specified name.
+
+        Args:
+            name: The setting name to remove.
+
+        Returns:
+            This builder for method chaining.
+        """
+        self._settings_entries = [entry for entry in self._settings_entries if entry.name.lower() != name.lower()]
+        return self
+
+    def remove_settings_by_name_and_lane(self, name: str, lane: str | None) -> "AvitiSheetBuilder":
+        """Remove settings with exact name and lane match.
+
+        Args:
+            name: The setting name to remove.
+            lane: The lane specification to match.
+
+        Returns:
+            This builder for method chaining.
+        """
+        self._settings_entries = [
+            entry for entry in self._settings_entries if not (entry.name.lower() == name.lower() and entry.lane == lane)
+        ]
+        return self
+
+    def clear_settings(self) -> "AvitiSheetBuilder":
+        """Remove all settings.
+
+        Returns:
+            This builder for method chaining.
+        """
+        self._settings_entries.clear()
+        self._settings_extra.clear()
+        return self
+
+    def build(self) -> "AvitiSheet":
+        """Build the immutable AvitiSheet instance.
+
+        Returns:
+            A new AvitiSheet with the builder's data.
+
+        Raises:
+            ValidationError: If the data is invalid.
+        """
+        # Build run values section
+        run_values = None
+        if self._run_values or self._run_values_extra:
+            run_values = AvitiRunValues(
+                data=CaseInsensitiveDict(self._run_values), extra_metadata=CaseInsensitiveDict(self._run_values_extra)
+            )
+
+        # Build settings section
+        settings = None
+        if self._settings_entries or self._settings_extra:
+            settings = AvitiSettings(
+                settings=AvitiSettingEntries(entries=self._settings_entries.copy()),
+                extra_metadata=CaseInsensitiveDict(self._settings_extra),
+            )
+
+        # Build the sheet
+        return AvitiSheet(run_values=run_values, settings=settings, samples=self._samples.copy())
