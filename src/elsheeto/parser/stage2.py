@@ -16,9 +16,6 @@ from elsheeto.parser.common import ParserConfiguration
 #: The module logger.
 LOGGER = logging.getLogger(__name__)
 
-#: Known data section names (case-insensitive)
-DATA_SECTION_NAMES = {"data", "samples"}
-
 
 class Parser:
     """Stage 2 parser that converts raw sectioned data into structured content.
@@ -52,20 +49,31 @@ class Parser:
         header_sections = []
         data_section = None
 
-        for section in raw_sheet.sections:
-            if self._is_data_section(section):
-                if data_section is not None:
-                    LOGGER.warning("Multiple data sections found, using the last one")
-                data_section = self._convert_to_data_section(section)
-            else:
+        if not raw_sheet.sections:
+            # No sections at all - create empty data section
+            data_section = DataSection(headers=[], header_to_index={}, data=[])
+            LOGGER.debug("No sections found, created empty data section")
+        elif len(raw_sheet.sections) == 1 and raw_sheet.sections[0].name == "":
+            # Sectionless sheet - single unnamed section is the data section
+            data_section = self._convert_to_data_section(raw_sheet.sections[0])
+            LOGGER.debug("Sectionless sheet: unnamed section treated as data section")
+        else:
+            # Sectioned sheet - last section is data, all others are headers
+            # Process all sections except the last one as header sections
+            for section in raw_sheet.sections[:-1]:
                 header_section = self._convert_to_header_section(section)
                 if header_section:  # Only add non-empty header sections
                     header_sections.append(header_section)
 
-        # If no data section was found, create an empty one
+            # Last section is always the data section
+            if raw_sheet.sections:
+                data_section = self._convert_to_data_section(raw_sheet.sections[-1])
+                LOGGER.debug("Sectioned sheet: last section treated as data section")
+
+        # Ensure we always have a data section
         if data_section is None:
             data_section = DataSection(headers=[], header_to_index={}, data=[])
-            LOGGER.debug("No data section found, created empty data section")
+            LOGGER.debug("No data section created, using empty data section")
 
         return ParsedSheet(
             delimiter=raw_sheet.delimiter,
@@ -73,94 +81,6 @@ class Parser:
             header_sections=header_sections,
             data_section=data_section,
         )
-
-    def _is_data_section(self, section: ParsedRawSection) -> bool:
-        """Determine if a section should be treated as a data section.
-
-        Args:
-            section: The section to analyze.
-
-        Returns:
-            True if this should be treated as a data section.
-        """
-        # Check if section name matches known data section names (case-insensitive comparison)
-        if section.name.lower() in DATA_SECTION_NAMES:
-            return True
-
-        # For sectionless sheets, treat the unnamed section as data if it has tabular structure
-        if section.name == "" and self._has_tabular_structure(section):
-            return True
-
-        # Check if section has tabular structure (header row + data rows)
-        if self._has_tabular_structure(section):
-            return True
-
-        return False
-
-    def _has_tabular_structure(self, section: ParsedRawSection) -> bool:
-        """Check if a section has tabular structure (headers + consistent data rows).
-
-        Args:
-            section: The section to analyze.
-
-        Returns:
-            True if the section appears to have tabular structure.
-        """
-        if not section.data or len(section.data) < 2:
-            return False
-
-        # Check if we have at least one potential header row and data rows
-        # First row should have text-like headers, subsequent rows should be consistent
-        first_row = section.data[0]
-
-        # Headers should be non-empty strings
-        if not all(cell.strip() for cell in first_row):
-            return False
-
-        # Check if subsequent rows have similar structure (similar column count)
-        expected_cols = len(first_row)
-        for row in section.data[1:]:
-            # Allow some flexibility in column count for real-world data
-            if abs(len(row) - expected_cols) > 1:
-                return False
-
-        # Additional heuristic: if this looks like key-value pairs, it's not tabular
-        # Key-value pairs typically have exactly 2 columns and the first column
-        # contains descriptive keys rather than simple identifiers
-        # Single-column sections are typically not tabular data
-        if expected_cols == 1:
-            return False
-
-        if expected_cols == 2 and len(section.data) <= 10:  # Arbitrary threshold
-            # Check if first column looks like keys (longer descriptive text)
-            first_col_values = [row[0].strip() for row in section.data if row]
-
-            # Check for common key patterns indicating key-value pairs:
-            # 1. Keys that are more descriptive (contain non-alphanumeric chars, longer length)
-            # 2. Pattern where first column contains varied text types
-            # 3. Values in second column are not obviously column data
-
-            # Look for descriptive key patterns
-            has_descriptive_keys = any(
-                " " in key and len(key) > 8 for key in first_col_values  # Contains space and is reasonably long
-            )
-
-            # Look for key naming patterns (camelCase, snake_case, etc.)
-            has_key_patterns = any(
-                "_" in key or (key != key.lower() and key != key.upper() and not key.istitle())
-                for key in first_col_values
-            )
-
-            # Check if keys look like configuration/metadata keys
-            metadata_patterns = ["version", "name", "date", "type", "setting", "config", "param"]
-            has_metadata_keys = any(
-                any(pattern in key.lower() for pattern in metadata_patterns) for key in first_col_values
-            )
-
-            if has_descriptive_keys or has_key_patterns or has_metadata_keys:
-                return False
-
-        return True
 
     def _convert_to_header_section(self, section: ParsedRawSection) -> HeaderSection | None:
         """Convert a raw section to a header section (preserving original row structure).

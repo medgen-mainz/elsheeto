@@ -192,8 +192,8 @@ class TestParser:
         assert len(result.header_sections) == 0
         assert result.data_section is not None
 
-    def test_parse_no_data_section(self):
-        """Test parsing when no data section is present."""
+    def test_parse_single_section_as_data(self):
+        """Test parsing when only one section is present - it becomes data section."""
         raw_sheet = ParsedRawSheet(
             delimiter=",",
             sheet_type=ParsedSheetType.SECTIONED,
@@ -210,10 +210,9 @@ class TestParser:
         parser = Parser(config)
         result = parser.parse(raw_sheet=raw_sheet)
 
-        assert len(result.header_sections) == 1
-        # Should create empty data section
-        assert result.data_section is not None
-        assert result.data_section.headers == []
+        # Single section becomes data section per new rules
+        assert len(result.header_sections) == 0
+        assert result.data_section.headers == ["Key1", "Value1"]
         assert result.data_section.data == []
 
     def test_case_sensitivity_headers(self):
@@ -244,7 +243,7 @@ class TestParser:
         assert result.data_section.headers == ["COL1", "COL2"]
 
     def test_single_value_rows(self):
-        """Test handling of single-value rows (e.g., Reads section)."""
+        """Test handling of single-value rows - single section becomes data section."""
         raw_sheet = ParsedRawSheet(
             delimiter=",",
             sheet_type=ParsedSheetType.SECTIONED,
@@ -261,75 +260,56 @@ class TestParser:
         parser = Parser(config)
         result = parser.parse(raw_sheet=raw_sheet)
 
-        assert len(result.header_sections) == 1
-        header = result.header_sections[0]
-        # Check that we have two rows with single values (reads format)
-        assert len(header.rows) == 2
-        assert header.rows[0] == ["150"]
-        assert header.rows[1] == ["150"]
-        # These rows won't be available in key_values since they're not 2-element pairs
-        assert len(header.key_values) == 0
+        # Single section becomes data section per new rules
+        assert len(result.header_sections) == 0
+        assert result.data_section.headers == ["150"]
+        assert result.data_section.data == [["150"]]
 
-    def test_is_data_section(self):
-        """Test data section identification."""
-        config = ParserConfiguration()
-        parser = Parser(config)
-
-        # Known data section names
-        data_section = ParsedRawSection(name="data", num_columns=2, data=[])
-        assert parser._is_data_section(data_section)
-
-        samples_section = ParsedRawSection(name="samples", num_columns=2, data=[])
-        assert parser._is_data_section(samples_section)
-
-        # Section with tabular structure
-        tabular_section = ParsedRawSection(
-            name="custom",
-            num_columns=2,
-            data=[["Header1", "Header2"], ["Val1", "Val2"]],
-        )
-        assert parser._is_data_section(tabular_section)
-
-        # Key-value section
-        header_section = ParsedRawSection(
-            name="header",
-            num_columns=2,
-            data=[["Key", "Value"]],
-        )
-        assert not parser._is_data_section(header_section)
-
-    def test_has_tabular_structure(self):
-        """Test tabular structure detection."""
-        config = ParserConfiguration()
-        parser = Parser(config)
-
-        # Valid tabular structure
-        tabular_section = ParsedRawSection(
-            name="test",
-            num_columns=3,
-            data=[
-                ["Header1", "Header2", "Header3"],
-                ["Val1", "Val2", "Val3"],
-                ["Val4", "Val5", "Val6"],
+    def test_last_section_is_data(self):
+        """Test that only the last section is treated as data section."""
+        raw_sheet = ParsedRawSheet(
+            delimiter=",",
+            sheet_type=ParsedSheetType.SECTIONED,
+            sections=[
+                ParsedRawSection(
+                    name="header",
+                    num_columns=2,
+                    data=[["Key1", "Value1"]],
+                ),
+                ParsedRawSection(
+                    name="data",
+                    num_columns=2,
+                    data=[["Col1", "Col2"], ["Val1", "Val2"]],
+                ),
             ],
         )
-        assert parser._has_tabular_structure(tabular_section)
 
-        # Too few rows
-        short_section = ParsedRawSection(name="test", num_columns=2, data=[["Header1", "Header2"]])
-        assert not parser._has_tabular_structure(short_section)
+        config = ParserConfiguration()
+        parser = Parser(config)
+        result = parser.parse(raw_sheet=raw_sheet)
 
-        # Empty headers
-        empty_header_section = ParsedRawSection(name="test", num_columns=2, data=[["", ""], ["Val1", "Val2"]])
-        assert not parser._has_tabular_structure(empty_header_section)
+        # First section becomes header, last section becomes data
+        assert len(result.header_sections) == 1
+        assert result.header_sections[0].name == "header"
+        assert result.data_section.headers == ["Col1", "Col2"]
+        assert result.data_section.data == [["Val1", "Val2"]]
 
-        # Inconsistent column counts
-        inconsistent_section = ParsedRawSection(
-            name="test",
-            num_columns=3,
-            data=[["H1", "H2"], ["V1", "V2", "V3", "V4"]],  # Very different column counts
+    def test_no_sections_creates_empty_data(self):
+        """Test that no sections results in empty data section."""
+        raw_sheet = ParsedRawSheet(
+            delimiter=",",
+            sheet_type=ParsedSheetType.SECTIONED,
+            sections=[],
         )
-        assert not parser._has_tabular_structure(inconsistent_section)
+
+        config = ParserConfiguration()
+        parser = Parser(config)
+        result = parser.parse(raw_sheet=raw_sheet)
+
+        # No sections should create empty data section
+        assert len(result.header_sections) == 0
+        assert result.data_section.headers == []
+        assert result.data_section.data == []
 
     def test_convert_to_header_section(self):
         """Test header section conversion."""
@@ -383,8 +363,8 @@ class TestParser:
         assert result.headers == []
         assert result.data == []
 
-    def test_multiple_data_sections_warning(self, caplog):
-        """Test warning when multiple data sections are found."""
+    def test_multiple_sections_first_is_header_last_is_data(self):
+        """Test that with multiple sections, first becomes header and last becomes data."""
         raw_sheet = ParsedRawSheet(
             delimiter=",",
             sheet_type=ParsedSheetType.SECTIONED,
@@ -404,17 +384,17 @@ class TestParser:
 
         config = ParserConfiguration()
         parser = Parser(config)
+        result = parser.parse(raw_sheet=raw_sheet)
 
-        with caplog.at_level("WARNING"):
-            result = parser.parse(raw_sheet=raw_sheet)
-
-        # Should warn about multiple data sections
-        assert "Multiple data sections found" in caplog.text
-        # Should use the last data section (samples)
+        # First section becomes header, last becomes data
+        assert len(result.header_sections) == 1
+        assert result.header_sections[0].name == "data"
+        # Last section (samples) becomes data section
         assert result.data_section.headers == ["Sample", "Index"]
+        assert result.data_section.data == [["S1", "AAA"]]
 
-    def test_header_row_flexible_fields(self):
-        """Test that header rows with any number of fields are now accepted."""
+    def test_multiple_sections_with_flexible_fields(self):
+        """Test that multiple sections work with flexible fields - first is header, last is data."""
         raw_sheet = ParsedRawSheet(
             delimiter=",",
             sheet_type=ParsedSheetType.SECTIONED,
@@ -423,7 +403,15 @@ class TestParser:
                     name="header",
                     num_columns=4,
                     data=[
-                        ["Key1", "Value1", "ExtraField1", "ExtraField2"],  # Now should work fine
+                        ["Key1", "Value1", "ExtraField1", "ExtraField2"],
+                    ],
+                ),
+                ParsedRawSection(
+                    name="data",
+                    num_columns=2,
+                    data=[
+                        ["Sample", "Value"],
+                        ["S1", "V1"],
                     ],
                 ),
             ],
@@ -433,14 +421,14 @@ class TestParser:
         parser = Parser(config)
         result = parser.parse(raw_sheet=raw_sheet)
 
-        # Should not raise error and create header section
+        # First section becomes header
         assert len(result.header_sections) == 1
         header = result.header_sections[0]
-        # This row has more than 2 fields, so it won't appear in key_values
-        assert len(header.key_values) == 0
-        # But the raw row should be preserved
         assert len(header.rows) == 1
         assert header.rows[0] == ["Key1", "Value1", "ExtraField1", "ExtraField2"]
+        # Last section becomes data
+        assert result.data_section.headers == ["Sample", "Value"]
+        assert result.data_section.data == [["S1", "V1"]]
 
 
 class TestParseFunction:
