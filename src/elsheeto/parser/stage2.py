@@ -19,6 +19,9 @@ LOGGER = logging.getLogger(__name__)
 #: Known data section names (case-insensitive)
 DATA_SECTION_NAMES = {"data", "samples"}
 
+#: Known header section names (case-insensitive) that should never be treated as data sections
+HEADER_SECTION_NAMES = {"settings", "runvalues", "header", "metadata"}
+
 
 class Parser:
     """Stage 2 parser that converts raw sectioned data into structured content.
@@ -86,6 +89,10 @@ class Parser:
         # Check if section name matches known data section names (case-insensitive comparison)
         if section.name.lower() in DATA_SECTION_NAMES:
             return True
+
+        # Check if section name matches known header section names - never treat these as data
+        if section.name.lower() in HEADER_SECTION_NAMES:
+            return False
 
         # For sectionless sheets, treat the unnamed section as data if it has tabular structure
         if section.name == "" and self._has_tabular_structure(section):
