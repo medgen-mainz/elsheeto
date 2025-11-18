@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/medgen-mainz/elsheeto/compare/elsheeto-v0.3.0...elsheeto-v0.3.1) (2025-11-18)
+
+
+### Bug Fixes
+
+* simplify data section assignment ([#29](https://github.com/medgen-mainz/elsheeto/issues/29)) ([#31](https://github.com/medgen-mainz/elsheeto/issues/31)) ([cb2ba53](https://github.com/medgen-mainz/elsheeto/commit/cb2ba53223d9c29f38e4b6bf07f651d867680fea))
+
 ## [0.3.0](https://github.com/medgen-mainz/elsheeto/compare/elsheeto-v0.2.2...elsheeto-v0.3.0) (2025-11-05)
 
 
