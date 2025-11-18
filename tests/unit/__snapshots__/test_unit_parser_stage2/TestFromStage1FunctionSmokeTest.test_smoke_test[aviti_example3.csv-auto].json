@@ -24,6 +24,20 @@
     ]
   },
   "delimiter": ",",
-  "header_sections": [],
+  "header_sections": [
+    {
+      "name": "settings",
+      "rows": [
+        [
+          "R1Adapter",
+          " CGTGCTGGATTGGCTCACCAGACACCTTCCGACAT"
+        ],
+        [
+          "R2Adapter",
+          " AGTTGACAAGCGGTAGCCTGCACACCTTCCGACAT"
+        ]
+      ]
+    }
+  ],
   "sheet_type": "sectioned"
 }
