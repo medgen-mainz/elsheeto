@@ -71,7 +71,7 @@ class Parser:
                 LOGGER.debug("Sectioned sheet: last section treated as data section")
 
         # Ensure we always have a data section
-        if data_section is None:
+        if data_section is None:  # pragma: no cover
             data_section = DataSection(headers=[], header_to_index={}, data=[])
             LOGGER.debug("No data section created, using empty data section")
 

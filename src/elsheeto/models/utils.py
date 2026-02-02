@@ -104,7 +104,7 @@ class CaseInsensitiveDict[_KT, _VT](MutableMapping[_KT, _VT]):
         )
 
     @classmethod
-    def _validate(cls, value: Any) -> "CaseInsensitiveDict":
+    def _validate(cls, value: Any) -> "CaseInsensitiveDict":  # type: ignore[type-arg]
         """Validate and convert value to CaseInsensitiveDict."""
         if isinstance(value, cls):
             return value
@@ -113,6 +113,6 @@ class CaseInsensitiveDict[_KT, _VT](MutableMapping[_KT, _VT]):
         raise TypeError(f"Expected dict or CaseInsensitiveDict, got {type(value)}")
 
     @classmethod
-    def _serialize(cls, value: "CaseInsensitiveDict") -> dict[str, Any]:
+    def _serialize(cls, value: "CaseInsensitiveDict") -> dict[str, Any]:  # type: ignore[type-arg]
         """Serialize CaseInsensitiveDict to regular dict for Pydantic."""
         return dict(value.items())
