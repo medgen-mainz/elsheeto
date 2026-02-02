@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/medgen-mainz/elsheeto/compare/elsheeto-v0.3.1...elsheeto-v0.3.2) (2026-02-02)
+
+
+### Bug Fixes
+
+* type annotations for CaseInsensitiveDict ([#33](https://github.com/medgen-mainz/elsheeto/issues/33)) ([72fd110](https://github.com/medgen-mainz/elsheeto/commit/72fd110c3d16acbf1df9874bd589321658777486))
+
 ## [0.3.1](https://github.com/medgen-mainz/elsheeto/compare/elsheeto-v0.3.0...elsheeto-v0.3.1) (2025-11-18)
 
 
