@@ -3,7 +3,7 @@
 The Stage 2 results are converted into these models in Stage 3.
 """
 
-from typing import TYPE_CHECKING, Mapping
+from typing import TYPE_CHECKING, Any, Mapping
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -32,7 +32,7 @@ class AvitiSample(BaseModel):
     description: str | None = None
 
     #: Optional extra metadata for unknown fields.
-    extra_metadata: CaseInsensitiveDict = Field(default_factory=CaseInsensitiveDict)
+    extra_metadata: CaseInsensitiveDict[str, Any] = Field(default_factory=CaseInsensitiveDict)
 
     #: Model configuration.
     model_config = ConfigDict(frozen=True)
@@ -101,9 +101,9 @@ class AvitiRunValues(BaseModel):
     """Representation of the `RunValues` section of an Aviti sample sheet."""
 
     #: Key-value pairs from the RunValues section.
-    data: CaseInsensitiveDict = Field(default_factory=CaseInsensitiveDict)
+    data: CaseInsensitiveDict[str, Any] = Field(default_factory=CaseInsensitiveDict)
     #: Optional extra metadata.
-    extra_metadata: CaseInsensitiveDict = Field(default_factory=CaseInsensitiveDict)
+    extra_metadata: CaseInsensitiveDict[str, Any] = Field(default_factory=CaseInsensitiveDict)
 
     model_config = ConfigDict(frozen=True)
 
@@ -191,12 +191,12 @@ class AvitiSettings(BaseModel):
     #: Collection of setting entries (may include lane-specific settings).
     settings: AvitiSettingEntries = Field(default_factory=AvitiSettingEntries)
     #: Optional extra metadata.
-    extra_metadata: CaseInsensitiveDict = Field(default_factory=CaseInsensitiveDict)
+    extra_metadata: CaseInsensitiveDict[str, Any] = Field(default_factory=CaseInsensitiveDict)
 
     model_config = ConfigDict(frozen=True)
 
     @property
-    def data(self) -> CaseInsensitiveDict:
+    def data(self) -> CaseInsensitiveDict[str, Any]:
         """Get simple key-value pairs for backward compatibility.
 
         For lane-specific settings, only returns the first occurrence of each setting name.
@@ -207,7 +207,7 @@ class AvitiSettings(BaseModel):
                 result[setting.name] = setting.value
         return result
 
-    def get_settings_by_lane(self, lane: str | None = None) -> CaseInsensitiveDict:
+    def get_settings_by_lane(self, lane: str | None = None) -> CaseInsensitiveDict[str, Any]:
         """Get settings filtered by lane specification.
 
         Args:

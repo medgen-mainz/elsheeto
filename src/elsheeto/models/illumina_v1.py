@@ -3,7 +3,7 @@
 The Stage 2 results are converted into these models in Stage 3.
 """
 
-from typing import TYPE_CHECKING, Annotated, Mapping
+from typing import TYPE_CHECKING, Annotated, Any, Mapping
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -43,7 +43,7 @@ class IlluminaHeader(BaseModel):
     run: str | None = None
 
     #: Optional extra metadata for fields not explicitly defined.
-    extra_metadata: CaseInsensitiveDict = Field(default_factory=CaseInsensitiveDict)
+    extra_metadata: CaseInsensitiveDict[str, Any] = Field(default_factory=CaseInsensitiveDict)
 
     #: Model configuration.
     model_config = ConfigDict(frozen=True)
@@ -67,10 +67,10 @@ class IlluminaSettings(BaseModel):
     """
 
     #: Key/value data in the settings section.
-    data: CaseInsensitiveDict
+    data: CaseInsensitiveDict[str, Any]
 
     #: Optional extra metadata.
-    extra_metadata: Annotated[CaseInsensitiveDict, Field(default_factory=CaseInsensitiveDict)]
+    extra_metadata: Annotated[CaseInsensitiveDict[str, Any], Field(default_factory=CaseInsensitiveDict)]
 
     #: Model configuration.
     model_config = ConfigDict(frozen=True)
@@ -107,7 +107,7 @@ class IlluminaSample(BaseModel):
     description: str | None = None
 
     #: Optional extra metadata for fields not explicitly defined.
-    extra_metadata: CaseInsensitiveDict = Field(default_factory=CaseInsensitiveDict)
+    extra_metadata: CaseInsensitiveDict[str, Any] = Field(default_factory=CaseInsensitiveDict)
 
     #: Model configuration.
     model_config = ConfigDict(frozen=True)
