@@ -3,48 +3,56 @@ build-backend = "hatchling.build"
 requires = ["hatchling"]
 
 [project]
-authors = [{name = "Manuel Holtgrewe"}]
+authors = [{name = "Manuel Holtgrewe", email = "manuel.holtgrewe@medgen-mainz.de"}]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Typing :: Typed",
 ]
 dependencies = [
     "pydantic>=2.12,<3.0",
 ]
 description = "I/O and models in type-annotated Python for NGS sample sheets: Illumina and Aviti"
-keywords = []
+keywords = [
+    "aviti",
+    "bioinformatics",
+    "illumina",
+    "ngs",
+    "sample-sheet",
+    "sequencing",
+]
 license = "MIT"
 license-files = ["LICENSE"]
 name = "elsheeto"
-version = "0.3.2"
+# Single-sourced from src/elsheeto/version.py, which release-please owns.
+dynamic = ["version"]
 readme = "README.md"
 requires-python = ">=3.13"
 
 [project.urls]
-Documentation = "https://github.com/medgen-mainz/elsheeto"
+Homepage = "https://github.com/medgen-mainz/elsheeto"
+Documentation = "https://elsheeto.readthedocs.io/en/latest/"
+Changelog = "https://github.com/medgen-mainz/elsheeto/blob/main/CHANGELOG.md"
 Issues = "https://github.com/medgen-mainz/elsheeto/issues"
 Source = "https://github.com/medgen-mainz/elsheeto"
 
 [tool.hatch.version]
-path = "elsheeto/version.py"
+path = "src/elsheeto/version.py"
 
 [dependency-groups]
 dev = [
-    "black==25.9.0",
     "coverage>=7.10.7",
-    "docutils>=0.18.1,<0.22",
-    "flake8>=3.6.0",
-    "pyright",
-    "pytest-cache>=1.0",
-    "pytest-cov",
-    "pytest-cov>=2.4.0",
-    "pytest-sugar>=0.8.0",
-    "pytest>=3.0.6",
+    "pyright>=1.1.400",
+    "pytest>=8.0.0",
+    "pytest-cov>=5.0.0",
+    "pytest-sugar>=1.0.0",
     "ruff>=0.14.2",
     "sphinx>=7.0.0",
     "sphinx-rtd-theme>=2.0.0",
@@ -68,8 +76,10 @@ pythonVersion = "3.13"
 pythonPlatform = "Linux"
 
 [tool.ruff]
+line-length = 120
+
 lint.ignore = [
-  "E501", # line too long, handled by black
+  "E501", # line too long, handled by the formatter
   "B008", # do not perform function calls in argument defaults
   "C901", # too complex
   # the following are known issues in generated code
@@ -89,14 +99,33 @@ lint.select = [
   "B", # flake8-bugbear
 ]
 
-[tool.black]
-line-length = 120
+[tool.ruff.lint.isort]
+known-first-party = ["elsheeto"]
 
 [tool.pytest.ini_options]
-addopts = "--doctest-modules"
+addopts = [
+  "--doctest-modules",
+  "--strict-markers",
+  "--strict-config",
+  "-ra",
+]
+testpaths = ["tests", "src/elsheeto"]
+xfail_strict = true
 
-[tool.ruff.lint.isort]
-known-first-party = ["src/elsheeto"]
+[tool.coverage.run]
+branch = true
+source = ["src/elsheeto"]
+
+[tool.coverage.report]
+show_missing = true
+# Every statement is covered; 17 implicit branches are not, which is why this
+# is 99 and not 100. It is a ratchet: raise it, never lower it.
+fail_under = 99
+exclude_also = [
+  "if TYPE_CHECKING:",
+  "raise NotImplementedError",
+  "@overload",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/elsheeto"]
@@ -114,9 +143,12 @@ include = [
   "/examples",
   "/AUTHORS.rst",
   "/CHANGELOG.md",
+  "/CITATION.cff",
+  "/CONTRIBUTING.md",
   "/LICENSE",
   "/Makefile",
   "/README.md",
+  "/SECURITY.md",
   "/pyproject.toml",
 ]
 exclude = [

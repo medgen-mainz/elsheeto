@@ -31,8 +31,8 @@ I/O and models in type-annotated Python for NGS sample sheets: Illumina (v1) and
 - Composite index handling for Aviti (e.g., `ATCG+GCTA`)
 - Case-insensitive field access
 - Immutable data structures with modification methods
-- 100% type coverage with mypy/pyright
-- Comprehensive test suite
+- Ships `py.typed`; the library is type-checked with pyright
+- Comprehensive test suite covering 100% of statements
 
 ## Quick Start
 
@@ -117,9 +117,9 @@ Complete documentation is available at [ReadTheDocs](https://elsheeto.readthedoc
 
 ## Contributing
 
-Contributions are welcome! Please see the development setup in the repository for details on:
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for the development
+setup, the commit message convention, and how releases are cut.
 
-- Type safety requirements (100% mypy/pyright compliance)
-- Testing with pytest
-- Code formatting with black and ruff
-- Three-stage parsing architecture
+## Security
+
+To report a vulnerability, see [SECURITY.md](SECURITY.md).

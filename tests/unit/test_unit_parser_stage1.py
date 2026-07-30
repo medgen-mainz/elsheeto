@@ -662,7 +662,6 @@ TestKey,TestValue
 
 
 class TestFromCsvFunctionSmokeTest:
-
     path_data = Path(__file__).parent.parent / "data"
     csv_files: list[Path] = sorted(path_data.glob("*/*.csv"))
 

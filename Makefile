@@ -26,24 +26,24 @@ sync:
 
 .PHONY: fix
 fix:
-	uv run black $(SOURCES)
+	uv run ruff format $(SOURCES)
 	uv run ruff check --fix --unsafe-fixes $(SOURCES)
 	$(MAKE) check
 
 .PHONY: check
 check:
 	uv lock --check
-	uv run black --check --diff --preview $(SOURCES)
+	uv run ruff format --check --diff $(SOURCES)
 	uv run ruff check $(SOURCES)
 	uv run pyright $(SOURCES)
 
 .PHONY: test
 test:
-	uv run pytest --cov=src/elsheeto --cov-report=term-missing --durations 5 -s tests/ src/elsheeto
+	uv run pytest --cov --cov-report=term-missing --durations 5
 
 .PHONY: test-snapshot
 test-snapshot:
-	uv run pytest --cov=src/elsheeto --cov-report=term-missing --durations 5 -s --snapshot-update tests/ src/elsheeto
+	uv run pytest --cov --cov-report=term-missing --durations 5 --snapshot-update
 
 .PHONY: examples
 examples:

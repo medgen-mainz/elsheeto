@@ -1,0 +1,7 @@
+# Default reviewers for everything in the repository.
+* @holtgrewe
+
+# Packaging, release automation, and CI changes can break publishing silently.
+/.github/workflows/ @holtgrewe
+/pyproject.toml     @holtgrewe
+/uv.lock            @holtgrewe

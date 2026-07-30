@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+title: "El Sheeto: I/O and models in type-annotated Python for NGS sample sheets"
+message: "If you use this software, please cite it using these metadata."
+type: software
+authors:
+  - family-names: Holtgrewe
+    given-names: Manuel
+    email: manuel.holtgrewe@medgen-mainz.de
+    affiliation: "Limbach Genetics eGbR, Medizinische Genetik Mainz"
+repository-code: "https://github.com/medgen-mainz/elsheeto"
+url: "https://elsheeto.readthedocs.io/en/latest/"
+abstract: >-
+  El Sheeto parses, validates, modifies, and writes next-generation sequencing
+  sample sheets in the Illumina v1 and Element Biosciences Aviti formats, using
+  type-annotated Pydantic models.
+keywords:
+  - bioinformatics
+  - next-generation sequencing
+  - sample sheet
+  - Illumina
+  - Aviti
+license: MIT

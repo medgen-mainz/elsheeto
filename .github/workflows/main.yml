@@ -57,22 +57,23 @@ jobs:
 
       - name: Run Lint
         run: |
-          uv run --no-sync black --check --diff --preview src tests examples
+          uv run --no-sync ruff format --check --diff src tests examples
           uv run --no-sync ruff check src tests examples
 
       - name: Run Type Checks
         run: uv run --no-sync pyright src tests examples
 
   testing:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     permissions:
       contents: read
     strategy:
       fail-fast: false
       matrix:
-        python-version:
-          - '3.13'
-          - '3.14'
+        # This library parses CSV, so line-ending and encoding behaviour must be
+        # exercised on every target platform, not just Linux.
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.13', '3.14']
     needs: formatting
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
@@ -89,10 +90,40 @@ jobs:
         run: uv sync --locked --all-groups --python "${{ matrix.python-version }}"
 
       - name: Run tests
-        run: |
-          uv run --no-sync pytest \
-            --cov=src/elsheeto --cov-report=term-missing --durations 5 -s \
-            tests/ src/elsheeto
+        run: uv run --no-sync pytest --cov --cov-report=term-missing --cov-report=xml --durations 5
+
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13'
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  # The floors in `dependencies` are a promise to users. Without this job they
+  # are never exercised, because the lockfile always resolves to newer versions.
+  minimum-dependencies:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs: formatting
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          lfs: true
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
+        with:
+          python-version: "3.13"
+          enable-cache: true
+
+      - name: Install lowest supported direct dependencies
+        run: uv sync --all-groups --resolution lowest-direct
+
+      - name: Run tests
+        run: uv run --no-sync pytest --durations 5
 
   # Builds the real distribution artifacts and proves they are usable. Without
   # this, a malformed sdist can silently publish a metadata-only wheel that
