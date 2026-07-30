@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.3](https://github.com/medgen-mainz/elsheeto/compare/elsheeto-v0.3.2...elsheeto-v0.3.3) (2026-07-30)
+
+
+### Bug Fixes
+
+* repair sdist packaging, harden release pipeline, correct package metadata ([#38](https://github.com/medgen-mainz/elsheeto/issues/38)) ([289f043](https://github.com/medgen-mainz/elsheeto/commit/289f043dd7edb4b5090d5e281b0897be3c3258fc))
+
 ## [0.3.2](https://github.com/medgen-mainz/elsheeto/compare/elsheeto-v0.3.1...elsheeto-v0.3.2) (2026-02-02)
 
 
