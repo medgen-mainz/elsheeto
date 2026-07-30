@@ -662,7 +662,6 @@ TestKey,TestValue
 
 
 class TestFromCsvFunctionSmokeTest:
-
     path_data = Path(__file__).parent.parent / "data"
     csv_files: list[Path] = sorted(path_data.glob("*/*.csv"))
 
@@ -674,7 +673,9 @@ class TestFromCsvFunctionSmokeTest:
     def idfn(value: Any) -> str:
         """Return a test ID string value."""
         if isinstance(value, Path):
-            return "_".join(str(value).rsplit("/")[-2:])
+            # Use `Path.parts` rather than splitting on "/", so that snapshot
+            # names stay identical on Windows.
+            return "_".join(value.parts[-2:])
         elif isinstance(value, CsvDelimiter):
             return value.value
         else:

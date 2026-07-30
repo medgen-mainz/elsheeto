@@ -1,0 +1,46 @@
+name: Bug report
+description: Report incorrect or unexpected behaviour
+labels: ["bug"]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: elsheeto version
+      placeholder: "0.3.2"
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      placeholder: "3.13.1"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: "Ubuntu 24.04"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: What you were trying to do, what happened, and what you expected instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: How can we reproduce it?
+      description: >
+        The code you ran and its output, including the full traceback. If a sample
+        sheet triggers the problem, attach a minimal, anonymised excerpt.
+      render: shell
+    validations:
+      required: true

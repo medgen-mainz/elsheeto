@@ -5,68 +5,166 @@ on:
     branches:
       - main
   pull_request:
+  # Allows the release workflow to gate publishing on a full CI run.
+  workflow_call:
+
+# Least privilege by default; jobs opt in to more where they need it.
+permissions: {}
+
+# Replaces the third-party `pull-request-workflow-cancel` action.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  cancel-previous:
-    runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/main'
-    steps:
-      - uses: khan/pull-request-workflow-cancel@1.0.1
-        with:
-          workflows: "main.yml"
-        env:
-          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
-
   docs:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
         with:
           python-version: "3.13"
+          enable-cache: true
+
+      - name: Install locked environment
+        run: uv sync --locked --all-groups
 
       - name: Build docs
-        run: |
-          uv run hatch run docs:build
+        run: uv run --no-sync sphinx-build -b html docs docs/_build/html
 
   formatting:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
         with:
           python-version: "3.13"
+          enable-cache: true
+
+      - name: Verify lockfile is up to date
+        run: uv lock --check
+
+      - name: Install locked environment
+        run: uv sync --locked --all-groups
 
       - name: Run Lint
         run: |
-          uv run hatch run quality:check
+          uv run --no-sync ruff format --check --diff src tests examples
+          uv run --no-sync ruff check src tests examples
 
       - name: Run Type Checks
-        run: |
-          uv run hatch run quality:typecheck
+        run: uv run --no-sync pyright src tests examples
 
   testing:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     strategy:
+      fail-fast: false
       matrix:
-        python-version:
-          - '3.13'
-          - '3.14'
+        # This library parses CSV, so line-ending and encoding behaviour must be
+        # exercised on every target platform, not just Linux.
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.13', '3.14']
     needs: formatting
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           lfs: true
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
         with:
           python-version: "${{ matrix.python-version }}"
+          enable-cache: true
+
+      - name: Install locked environment
+        run: uv sync --locked --all-groups --python "${{ matrix.python-version }}"
 
       - name: Run tests
+        run: uv run --no-sync pytest --cov --cov-report=term-missing --cov-report=xml --durations 5
+
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13'
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  # The floors in `dependencies` are a promise to users. Without this job they
+  # are never exercised, because the lockfile always resolves to newer versions.
+  minimum-dependencies:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs: formatting
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          lfs: true
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
+        with:
+          python-version: "3.13"
+          enable-cache: true
+
+      - name: Install lowest supported direct dependencies
+        run: uv sync --all-groups --resolution lowest-direct
+
+      - name: Run tests
+        run: uv run --no-sync pytest --durations 5
+
+  # Builds the real distribution artifacts and proves they are usable. Without
+  # this, a malformed sdist can silently publish a metadata-only wheel that
+  # installs cleanly and then fails at `import`.
+  package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
+        with:
+          python-version: "3.13"
+          enable-cache: true
+
+      - name: Build sdist and wheel
+        run: uv build --out-dir dist
+
+      - name: Rebuild wheel from the sdist
+        run: uv build --wheel --out-dir dist-from-sdist dist/*.tar.gz
+
+      - name: Validate metadata and wheel contents
         run: |
-            uv run hatch run tests:run
+          uvx twine check dist/* dist-from-sdist/*
+          uvx check-wheel-contents dist-from-sdist/*.whl
+
+      - name: Install sdist-built wheel into a clean environment and import it
+        run: |
+          uv venv /tmp/smoke --python 3.13
+          uv pip install --python /tmp/smoke/bin/python dist-from-sdist/*.whl
+          /tmp/smoke/bin/python -c "
+          import elsheeto, pathlib
+          assert (pathlib.Path(elsheeto.__file__).parent / 'py.typed').is_file(), 'py.typed missing from wheel'
+          print('package OK:', elsheeto.__version__)
+          "
+
+      - name: Upload distribution artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error

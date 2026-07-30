@@ -103,9 +103,8 @@ def example_modify_existing():
         # Remove a sample
         .with_sample_removed("Old_Sample_2")
         # Add run values
-        .with_run_value_added("ModificationDate", "2024-01-15").with_run_values_updated(
-            {"Status": "Modified", "Version": "2.0"}
-        )
+        .with_run_value_added("ModificationDate", "2024-01-15")
+        .with_run_values_updated({"Status": "Modified", "Version": "2.0"})
         # Add settings
         .with_setting_added("NewSetting", "NewValue", "1+2")
     )

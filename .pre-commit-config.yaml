@@ -1,0 +1,33 @@
+# Optional but recommended: `uv run pre-commit install`
+# These hooks are a fast subset of `make check`; CI remains the source of truth.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+      # Whitespace and line endings are significant in the CSV fixtures and in
+      # the recorded snapshots, so these hooks must not touch them. This library
+      # writes CRLF via the `csv` module; a fixture that tests it would
+      # otherwise be silently rewritten.
+      - id: end-of-file-fixer
+        exclude: ^(tests/data/|tests/.*/__snapshots__/|examples/output/)
+      - id: mixed-line-ending
+        args: [--fix=lf]
+        exclude: ^(tests/data/|tests/.*/__snapshots__/|examples/output/)
+      - id: trailing-whitespace
+        exclude: ^(tests/data/|tests/.*/__snapshots__/|examples/output/)
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.2
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.9.5
+    hooks:
+      - id: uv-lock
