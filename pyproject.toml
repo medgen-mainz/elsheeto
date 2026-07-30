@@ -7,7 +7,6 @@ authors = [{name = "Manuel Holtgrewe"}]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.13",
@@ -16,10 +15,11 @@ classifiers = [
 ]
 dependencies = [
     "pydantic>=2.12,<3.0",
-    "ruff>=0.14.2",
 ]
 description = "I/O and models in type-annotated Python for NGS sample sheets: Illumina and Aviti"
 keywords = []
+license = "MIT"
+license-files = ["LICENSE"]
 name = "elsheeto"
 version = "0.3.2"
 readme = "README.md"
@@ -39,40 +39,17 @@ dev = [
     "coverage>=7.10.7",
     "docutils>=0.18.1,<0.22",
     "flake8>=3.6.0",
-    "hatch~=1.14.2",
     "pyright",
     "pytest-cache>=1.0",
     "pytest-cov",
     "pytest-cov>=2.4.0",
     "pytest-sugar>=0.8.0",
     "pytest>=3.0.6",
+    "ruff>=0.14.2",
     "sphinx>=7.0.0",
     "sphinx-rtd-theme>=2.0.0",
     "sphinx-autodoc-typehints>=1.20.0",
     "syrupy>=5.0.0",
-]
-
-[tool.hatch.envs.quality]
-installer = "uv"
-feature = [
-  "dev",
-]
-
-[tool.hatch.envs.quality.scripts]
-check = [
-  "black --check --diff --preview src tests examples",
-  "ruff check src tests examples",
-]
-format = [
-  "black src tests examples",
-  "ruff check --fix --unsafe-fixes src tests examples",
-  "check",
-]
-typecheck = [
-  """
-  pyright --pythonpath="$(uv run --active hatch run quality:python -c 'import sys; print(sys.executable)')" \
-    {args:src/ tests/ examples/}
-  """
 ]
 
 [tool.pyright]
@@ -121,47 +98,29 @@ addopts = "--doctest-modules"
 [tool.ruff.lint.isort]
 known-first-party = ["src/elsheeto"]
 
-[tool.hatch.envs.tests]
-installer = "uv"
-feature = [
-  "dev",
-]
-
-[tool.hatch.envs.tests.scripts]
-run = "pytest --cov=src/elsheeto --cov-report=term-missing --durations 5 -s tests/ src/elsheeto {args:tests}"
-run-snapshot = "pytest --cov=src/elsheeto --cov-report=term-missing --durations 5 -s --snapshot-update tests/ src/elsheeto {args:tests}"
-
-[tool.hatch.envs.docs]
-installer = "uv"
-feature = [
-  "dev",
-]
-
-[tool.hatch.envs.docs.scripts]
-build = "sphinx-build -b html docs docs/_build/html"
-clean = "rm -rf docs/_build"
-serve = "python -m http.server 8000 --directory docs/_build/html"
-
-[tool.hatch.envs.build]
-installer = "uv"
-feature = [
-  "dev",
-]
-
-[tool.hatch.envs.build.scripts]
-run = "hatch build"
-
 [tool.hatch.build.targets.wheel]
 packages = ["src/elsheeto"]
 
+# NOTE: Do *not* use `packages` here. On the sdist target it rewrites paths and
+# flattens `src/elsheeto` to `elsheeto` at the archive root, after which the
+# wheel target's `packages = ["src/elsheeto"]` matches nothing and hatchling
+# silently emits a metadata-only wheel. The sdist must stay a faithful copy of
+# the source tree so that `pip wheel <sdist>` reproduces the real wheel.
 [tool.hatch.build.targets.sdist]
-packages = ["src/elsheeto"]
-exclude = [
-  "/.editorconfig",
-  "/Makefile",
-  "/.gitignore",
-  "/.github",
-  "/.vscode",
-  "/.gitignore",
+include = [
+  "/src",
   "/tests",
+  "/docs",
+  "/examples",
+  "/AUTHORS.rst",
+  "/CHANGELOG.md",
+  "/LICENSE",
+  "/Makefile",
+  "/README.md",
+  "/pyproject.toml",
+]
+exclude = [
+  "/docs/_build",
+  "**/__pycache__",
+  "**/*.py[co]",
 ]

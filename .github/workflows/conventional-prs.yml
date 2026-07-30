@@ -1,5 +1,7 @@
 name: PR
 on:
+  # `pull_request_target` runs with repository write scope. This workflow must
+  # therefore never check out or execute code from the pull request.
   pull_request_target:
     types:
       - opened
@@ -7,11 +9,19 @@ on:
       - edited
       - synchronize
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   title-format:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
     steps:
-      - uses: amannn/action-semantic-pull-request@v6
+      - uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

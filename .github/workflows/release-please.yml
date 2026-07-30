@@ -1,15 +1,23 @@
+name: release-please
+
 on:
   push:
     branches:
       - main
 
-name: release-please
+permissions: {}
 
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
         id: release
         with:
           config-file: release-please-config.json
@@ -17,22 +25,38 @@ jobs:
           token: ${{ secrets.BOT_TOKEN }}
           include-component-in-tag: false
 
-      - uses: actions/checkout@v5
-        if: ${{ steps.release.outputs.release_created }}
+  # Nothing is published until the full CI suite passes on the release commit.
+  # That includes the `package` job, which rebuilds the wheel from the sdist and
+  # imports it, so an unusable artifact can never reach PyPI.
+  ci:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    uses: ./.github/workflows/main.yml
+    permissions:
+      contents: read
+
+  publish:
+    needs: [release-please, ci]
+    if: ${{ needs.release-please.outputs.release_created }}
+    runs-on: ubuntu-latest
+    # Configure this environment in the repository settings to require a manual
+    # approval before any upload to PyPI.
+    environment:
+      name: pypi
+      url: https://pypi.org/project/elsheeto/
+    permissions:
+      # The only credential required: a short-lived OIDC token exchanged with
+      # PyPI Trusted Publishing. No long-lived API token is stored in secrets.
+      id-token: write
+    steps:
+      - name: Download the artifacts CI already built and verified
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          fetch-depth: 0
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-
-      - name: Build package
-        if: ${{ steps.release.outputs.release_created }}
-        run: |
-          uv run hatch run build:run
+          name: dist
+          path: dist/
 
       - name: Publish to PyPI
-        if: ${{ steps.release.outputs.release_created }}
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
         with:
-          user: __token__
-          password: ${{ secrets.PYPI_TOKEN }}
+          # Trusted Publishing + PEP 740 attestations; no user/password.
+          attestations: true
