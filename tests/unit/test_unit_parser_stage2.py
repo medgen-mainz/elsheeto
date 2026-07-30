@@ -474,7 +474,9 @@ class TestFromStage1FunctionSmokeTest:
     def idfn(value: Any) -> str:
         """Return a test ID string value."""
         if isinstance(value, Path):
-            return "_".join(str(value).rsplit("/")[-2:])
+            # Use `Path.parts` rather than splitting on "/", so that snapshot
+            # names stay identical on Windows.
+            return "_".join(value.parts[-2:])
         elif isinstance(value, CsvDelimiter):
             return value.value
         else:
